@@ -33,7 +33,7 @@ cvforge cv.yaml
 
 ## 📋 Requirements
 
-- **[Typst CLI](https://typst.app/docs/cli/)**: Must be installed and available in your `PATH`.
+- **[Typst](https://github.com/typst/typst)**: The Typst CLI must be installed and available in your `PATH`.
 - **Python 3.8+**
 
 ---
