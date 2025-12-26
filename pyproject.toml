@@ -1,0 +1,47 @@
+[project]
+name = "cvforge"
+version = "1.0.0"
+description = "ATS-friendly CV/Resume builder using YAML and Typst"
+readme = "README.md"
+authors = [
+    {name = "Ahmet Burhan Kayalı", email = "ahmetburhan1703@gmail.com"}
+]
+license = {text = "MIT"}
+requires-python = ">=3.8"
+
+[project.urls]
+Homepage = "https://github.com/SoAp9035/cv-forge"
+Repository = "https://github.com/SoAp9035/cv-forge"
+Issues = "https://github.com/SoAp9035/cv-forge/issues"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Office/Business",
+    "Topic :: Text Processing :: Markup",
+]
+keywords = ["cv", "resume", "typst", "ats", "pdf"]
+dependencies = [
+    "pyyaml>=6.0",
+    "pypdf>=4.0",
+]
+
+[project.scripts]
+cvforge = "cvforge.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["cvforge"]

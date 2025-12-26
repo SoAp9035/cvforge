@@ -1,0 +1,87 @@
+# CV Builder Configuration
+# Language: "en" (English) or "tr" (Turkish) - affects section headings
+# Font options: "noto", "roboto", "liberation", "dejavu", "inter"
+language: "en"
+font: "noto"
+
+# Personal Information
+name: "Your Name"
+role: "Your Title / Role"
+email: "your.email@example.com"
+phone: "+1 555 123 4567"
+location: "City, Country"
+website: "yourwebsite.com"
+linkedin: "linkedin.com/in/yourprofile"
+github: "github.com/yourusername"
+# photo: "photo.png"  # Optional: uncomment and add path to your photo
+
+# Professional Summary
+summary: |
+  A brief professional summary describing your experience, expertise, and career goals.
+  Keep it concise and impactful, typically 2-3 sentences.
+
+# Work Experience
+experience:
+  - company: "Company Name"
+    role: "Job Title"
+    date: "2022 - Present"
+    location: "City, Country"  # Optional
+    description:
+      - "Achievement or responsibility with measurable impact"
+      - "Another key accomplishment or project"
+      - "Technical skills applied or leadership demonstrated"
+
+  - company: "Previous Company"
+    role: "Previous Role"
+    date: "2020 - 2022"
+    description:
+      - "Key achievement in this role"
+      - "Notable project or contribution"
+
+# Education
+education:
+  - school: "University Name"
+    degree: "Degree Type in Field of Study"
+    date: "2016 - 2020"
+    location: "City, Country"  # Optional
+
+# Technical Skills (grouped by category)
+skills:
+  - Category: "Programming Languages"
+    Items: ["Python", "JavaScript", "TypeScript", "Go"]
+  - Category: "Frameworks & Libraries"
+    Items: ["React", "Node.js", "Django", "FastAPI"]
+  - Category: "Tools & Platforms"
+    Items: ["Docker", "Kubernetes", "AWS", "Git"]
+
+# Projects (optional)
+projects:
+  - name: "Project Name"
+    date: "2023"
+    url: "github.com/username/project"  # Optional
+    role: "Lead Developer"  # Optional
+    description:
+      - "Brief description of the project and your contribution"
+      - "Technologies used and impact achieved"
+
+# Languages (optional)
+languages:
+  - name: "English"
+    level: "Native"
+  - name: "Spanish"
+    level: "Professional"
+
+# Certifications (optional)
+certifications:
+  - name: "AWS Solutions Architect"
+    issuer: "Amazon Web Services"
+    date: "2023"
+
+# Awards (optional)
+awards:
+  - name: "Employee of the Year"
+    issuer: "Company Name"
+    date: "2022"
+
+# Interests (optional)
+interests: ["Open Source", "Machine Learning", "Photography"]
