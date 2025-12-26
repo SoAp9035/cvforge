@@ -135,7 +135,6 @@ skills:
 - ✅ **ATS Compatible**: Clean, selectable text
 - ✅ **Multi-language**: English and Turkish section headings
 - ✅ **11 ATS-friendly fonts**
-- ✅ **Turkish character support**: ş, ı, ğ, ü, ö, ç
 - ✅ **Built-in ATS checker**
 - ✅ **Optional photo support**
 
