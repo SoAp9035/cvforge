@@ -23,6 +23,12 @@
   "ubuntu": ("Ubuntu", "Noto Sans", "DejaVu Sans", "Arial"),
   "opensans": ("Open Sans", "Noto Sans", "DejaVu Sans", "Arial"),
   "sourcesans": ("Source Sans Pro", "Noto Sans", "DejaVu Sans", "Arial"),
+  "arial": ("Arial", "Liberation Sans", "Noto Sans", "DejaVu Sans"),
+  "times": ("Times New Roman", "Times", "Liberation Serif", "Noto Serif"),
+  "calibri": ("Calibri", "Carlito", "Liberation Sans", "Arial"),
+  "georgia": ("Georgia", "Gelasio", "Liberation Serif", "Noto Serif"),
+  "garamond": ("Garamond", "EB Garamond", "Liberation Serif", "Noto Serif"),
+  "trebuchet": ("Trebuchet MS", "Fira Sans", "Liberation Sans", "Arial"),
 )
 
 #let selected_font = get("font", default: "noto")
