@@ -1,46 +1,41 @@
-// CV Builder - ATS Friendly Typst Template
-// Supports dynamic fields, optional photo, Turkish/English, and font selection
-
 #import "@preview/ats-friendly-resume:0.1.1": *
 
-// Get input file path from command line or use default
 #let cv_data_path = sys.inputs.at("cv_data", default: "cv.yaml")
 #let data = yaml(cv_data_path)
 
-// Helper function to safely get optional fields
 #let get(field, default: none) = {
   if field in data { data.at(field) } else { default }
 }
 
-// Helper to check if field exists and is not empty
 #let has(field) = {
   field in data and data.at(field) != none and data.at(field) != ""
 }
 
-// Font mapping - 11 ATS-friendly options
 #let font_map = (
   "noto": ("Noto Sans", "DejaVu Sans", "Liberation Sans", "Arial"),
   "roboto": ("Roboto", "Noto Sans", "DejaVu Sans", "Arial"),
   "liberation": ("Liberation Sans", "DejaVu Sans", "Noto Sans", "Arial"),
   "dejavu": ("DejaVu Sans", "Liberation Sans", "Noto Sans", "Arial"),
   "inter": ("Inter", "Noto Sans", "DejaVu Sans", "Arial"),
-  // Additional ATS-friendly fonts
   "lato": ("Lato", "Noto Sans", "DejaVu Sans", "Arial"),
   "montserrat": ("Montserrat", "Noto Sans", "DejaVu Sans", "Arial"),
   "raleway": ("Raleway", "Noto Sans", "DejaVu Sans", "Arial"),
   "ubuntu": ("Ubuntu", "Noto Sans", "DejaVu Sans", "Arial"),
   "opensans": ("Open Sans", "Noto Sans", "DejaVu Sans", "Arial"),
   "sourcesans": ("Source Sans Pro", "Noto Sans", "DejaVu Sans", "Arial"),
+  "arial": ("Arial", "Liberation Sans", "Noto Sans", "DejaVu Sans"),
+  "times": ("Times New Roman", "Times", "Liberation Serif", "Noto Serif"),
+  "calibri": ("Calibri", "Carlito", "Liberation Sans", "Arial"),
+  "georgia": ("Georgia", "Gelasio", "Liberation Serif", "Noto Serif"),
+  "garamond": ("Garamond", "EB Garamond", "Liberation Serif", "Noto Serif"),
+  "trebuchet": ("Trebuchet MS", "Fira Sans", "Liberation Sans", "Arial"),
 )
 
-// Get selected font or default to noto
 #let selected_font = get("font", default: "noto")
 #let font_family = if selected_font in font_map { font_map.at(selected_font) } else { font_map.at("noto") }
 
-// Language configuration
 #let lang = get("language", default: "en")
 
-// Section heading translations
 #let tr = (
   "en": (
     "summary": "Summary",
@@ -66,7 +61,6 @@
   ),
 )
 
-// Get translation for current language
 #let t(key) = {
   let lang_key = if lang in tr { lang } else { "en" }
   tr.at(lang_key).at(key)
@@ -75,15 +69,14 @@
 #show: resume.with(
   author: get("name", default: "Name"),
   author-position: center,
-  // Only include optional fields if they exist
-  location: get("location", default: none),
-  email: get("email", default: none),
-  phone: get("phone", default: none),
-  linkedin: get("linkedin", default: none),
-  github: get("github", default: none),
-  portfolio: get("website", default: none),
+  location: get("location", default: ""),
+  email: get("email", default: ""),
+  phone: get("phone", default: ""),
+  linkedin: get("linkedin", default: ""),
+  github: get("github", default: ""),
+  portfolio: get("website", default: ""),
   personal-info-position: center,
-  color-enabled: false,  // ATS-friendly: no colors
+  color-enabled: false,
   font: font_family,
   paper: "a4",
   author-font-size: 20pt,
@@ -91,15 +84,14 @@
   lang: lang,
 )
 
-// Photo and Role section (if exists)
 #if has("photo") or has("role") [
   #align(center)[
     #if has("photo") [
       #box(
         clip: true,
-        radius: 4pt,  // Slight rounded corners for professional look
+        radius: 4pt,
         stroke: 0.5pt + luma(200),
-        image(data.photo, width: 2.5cm)  // Width only, height auto for aspect ratio
+        image(data.photo, width: 2.5cm)
       )
       #v(0.3em)
     ]
@@ -110,13 +102,11 @@
   #v(0.5em)
 ]
 
-// Summary section (if exists)
 #if has("summary") [
   == #t("summary")
   #data.summary
 ]
 
-// Technical Skills section (if exists)
 #if has("skills") and data.skills.len() > 0 [
   == #t("skills")
   #for skill in data.skills [
@@ -124,7 +114,6 @@
   ]
 ]
 
-// Experience section (if exists)
 #if has("experience") and data.experience.len() > 0 [
   == #t("experience")
   #for job in data.experience [
@@ -142,7 +131,6 @@
   ]
 ]
 
-// Education section (if exists)
 #if has("education") and data.education.len() > 0 [
   == #t("education")
   #for entry in data.education [
@@ -160,7 +148,6 @@
   ]
 ]
 
-// Projects section (if exists)
 #if has("projects") and data.projects.len() > 0 [
   == #t("projects")
   #for proj in data.projects [
@@ -180,7 +167,6 @@
   ]
 ]
 
-// Languages section (if exists)
 #if has("languages") and data.languages.len() > 0 [
   == #t("languages")
   #for lang_item in data.languages [
@@ -188,7 +174,6 @@
   ]
 ]
 
-// Certifications section (if exists)
 #if has("certifications") and data.certifications.len() > 0 [
   == #t("certifications")
   #for cert in data.certifications [
@@ -196,7 +181,6 @@
   ]
 ]
 
-// Awards section (if exists)
 #if has("awards") and data.awards.len() > 0 [
   == #t("awards")
   #for award in data.awards [
@@ -204,7 +188,6 @@
   ]
 ]
 
-// Interests section (if exists)
 #if has("interests") and data.interests.len() > 0 [
   == #t("interests")
   #data.interests.join(" • ")

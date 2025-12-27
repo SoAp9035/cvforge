@@ -9,7 +9,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Try to import yaml, but make it optional
 try:
     import yaml
     YAML_AVAILABLE = True
@@ -19,14 +18,12 @@ except ImportError:
 from . import __version__
 from .ats_checker import check_ats, PYPDF_AVAILABLE
 
-# Font mapping: key -> (primary font, fallback fonts)
 FONT_OPTIONS = {
     "noto": ("Noto Sans", ["DejaVu Sans", "Liberation Sans", "Arial"]),
     "roboto": ("Roboto", ["Noto Sans", "DejaVu Sans", "Arial"]),
     "liberation": ("Liberation Sans", ["DejaVu Sans", "Noto Sans", "Arial"]),
     "dejavu": ("DejaVu Sans", ["Liberation Sans", "Noto Sans", "Arial"]),
     "inter": ("Inter", ["Noto Sans", "DejaVu Sans", "Arial"]),
-    # Additional ATS-friendly fonts
     "lato": ("Lato", ["Noto Sans", "DejaVu Sans", "Arial"]),
     "montserrat": ("Montserrat", ["Noto Sans", "DejaVu Sans", "Arial"]),
     "raleway": ("Raleway", ["Noto Sans", "DejaVu Sans", "Arial"]),
@@ -35,10 +32,8 @@ FONT_OPTIONS = {
     "sourcesans": ("Source Sans Pro", ["Noto Sans", "DejaVu Sans", "Arial"]),
 }
 
-# Language options
 LANGUAGE_OPTIONS = ["en", "tr"]
 
-# Section translations
 SECTION_TRANSLATIONS = {
     "en": {
         "summary": "Summary",
@@ -86,14 +81,12 @@ def check_typst_installed() -> bool:
 def validate_yaml(yaml_path: Path) -> dict:
     """Load and validate YAML file, returning data dict."""
     if not YAML_AVAILABLE:
-        # Without PyYAML, just check file exists and is readable
         try:
             with open(yaml_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             if not content.strip():
                 print("Error: YAML file is empty.", file=sys.stderr)
                 sys.exit(1)
-            # Return empty dict - Typst will handle the actual YAML parsing
             return {}
         except Exception as e:
             print(f"Error reading YAML file: {e}", file=sys.stderr)
@@ -107,14 +100,12 @@ def validate_yaml(yaml_path: Path) -> dict:
             print("Error: YAML file is empty.", file=sys.stderr)
             sys.exit(1)
         
-        # Validate font option
         font = data.get("font", "noto")
         if font not in FONT_OPTIONS:
             print(f"Warning: Unknown font '{font}'. Using 'noto'.", file=sys.stderr)
             print(f"Available fonts: {', '.join(FONT_OPTIONS.keys())}", file=sys.stderr)
             data["font"] = "noto"
         
-        # Validate language option
         language = data.get("language", "en")
         if language not in LANGUAGE_OPTIONS:
             print(f"Warning: Unknown language '{language}'. Using 'en'.", file=sys.stderr)
@@ -141,7 +132,6 @@ def build_cv(input_file: Path) -> int:
     Returns:
         0 on success, 1 on failure
     """
-    # Validate input file
     if not input_file.exists():
         print(f"Error: Input file '{input_file}' not found.", file=sys.stderr)
         return 1
@@ -153,10 +143,8 @@ def build_cv(input_file: Path) -> int:
     # Validate YAML content and get data
     data = validate_yaml(input_file)
     
-    # Determine output file (same name, .pdf extension)
     output_file = input_file.with_suffix('.pdf').resolve()
     
-    # Get template directory
     template_dir = get_template_dir()
     typst_file = template_dir / "cv.typ"
     
@@ -164,13 +152,11 @@ def build_cv(input_file: Path) -> int:
         print(f"Error: Typst template '{typst_file}' not found.", file=sys.stderr)
         return 1
     
-    # Check if typst is installed
     if not check_typst_installed():
         print("Error: Typst is not installed or not in PATH.", file=sys.stderr)
         print("Install Typst from: https://typst.app/", file=sys.stderr)
         return 1
     
-    # Copy yaml to template directory for compilation
     input_abs = input_file.resolve()
     input_dir = input_abs.parent
     yaml_in_template_dir = template_dir / input_file.name
@@ -180,28 +166,23 @@ def build_cv(input_file: Path) -> int:
         shutil.copy2(input_abs, yaml_in_template_dir)
         temp_copy = True
     
-    # Check for photo and copy it to template directory if it exists
     photo_in_template_dir = None
     temp_photo_copy = False
     
-    # Try to get photo path from YAML data
     photo_path_str = data.get("photo") if data else None
     
-    # If YAML wasn't parsed (no PyYAML), try to extract photo path manually
     if photo_path_str is None:
         try:
             with open(input_abs, 'r', encoding='utf-8') as f:
                 for line in f:
                     stripped = line.strip()
                     if stripped.startswith("photo:"):
-                        # Extract value after "photo:"
                         photo_path_str = stripped.split(":", 1)[1].strip().strip('"').strip("'")
                         break
         except Exception:
             pass
     
     if photo_path_str:
-        # Resolve photo path relative to the input YAML file's directory
         photo_path = Path(photo_path_str)
         if not photo_path.is_absolute():
             photo_path = input_dir / photo_path
@@ -216,7 +197,6 @@ def build_cv(input_file: Path) -> int:
         else:
             print(f"Warning: Photo file '{photo_path_str}' not found.", file=sys.stderr)
     
-    # Build the CV
     print(f"Building CV: {input_file} -> {output_file}")
     
     try:
@@ -232,7 +212,6 @@ def build_cv(input_file: Path) -> int:
             cwd=str(template_dir)
         )
         
-        # Clean up temp copies
         if temp_copy and yaml_in_template_dir.exists():
             yaml_in_template_dir.unlink()
         if temp_photo_copy and photo_in_template_dir and photo_in_template_dir.exists():
@@ -247,7 +226,6 @@ def build_cv(input_file: Path) -> int:
         return 0
         
     except Exception as e:
-        # Clean up temp copies on error
         if temp_copy and yaml_in_template_dir.exists():
             yaml_in_template_dir.unlink()
         if temp_photo_copy and photo_in_template_dir and photo_in_template_dir.exists():
@@ -319,18 +297,14 @@ def ats_check(pdf_file: Path) -> int:
     report, output = check_ats(pdf_file)
     print(output)
     
-    # Return 0 if overall verdict is good, 1 otherwise
     if report.overall_verdict in ("Excellent", "Good"):
         return 0
     return 1
 
 
 def main():
-    # Check if first argument is a YAML file (shorthand: cvforge cv.yaml)
-    # This must happen before argparse to avoid subparser conflicts
     if len(sys.argv) >= 2:
         first_arg = sys.argv[1]
-        # If it's a YAML file (not a command and not a flag)
         if (first_arg.endswith('.yaml') or first_arg.endswith('.yml')) and not first_arg.startswith('-'):
             sys.exit(build_cv(Path(first_arg)))
     
@@ -348,7 +322,6 @@ def main():
     
     subparsers = parser.add_subparsers(dest="command", help="Commands")
     
-    # Build command
     build_parser = subparsers.add_parser("build", help="Build CV from YAML file")
     build_parser.add_argument(
         "input",
@@ -357,7 +330,6 @@ def main():
         help="Input YAML file (default: cv.yaml)"
     )
     
-    # Init command
     init_parser = subparsers.add_parser("init", help="Create template cv.yaml")
     init_parser.add_argument(
         "directory",
@@ -366,10 +338,8 @@ def main():
         help="Directory to create template in (default: current directory)"
     )
     
-    # Fonts command
     subparsers.add_parser("fonts", help="Show available font options")
     
-    # ATS Check command
     ats_parser = subparsers.add_parser("ats-check", help="Check if PDF is ATS-friendly")
     ats_parser.add_argument(
         "pdf",
@@ -378,7 +348,6 @@ def main():
     
     args = parser.parse_args()
     
-    # Handle commands
     if args.command == "init":
         sys.exit(init_template(Path(args.directory)))
     elif args.command == "fonts":
@@ -389,7 +358,6 @@ def main():
     elif args.command == "ats-check":
         sys.exit(ats_check(Path(args.pdf)))
     else:
-        # No command: show help message
         parser.print_help()
         sys.exit(0)
 
