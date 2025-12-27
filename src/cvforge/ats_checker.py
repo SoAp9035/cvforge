@@ -9,7 +9,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-# Try to import pypdf, but make it optional
 try:
     from pypdf import PdfReader
     PYPDF_AVAILABLE = True
@@ -17,24 +16,18 @@ except ImportError:
     PYPDF_AVAILABLE = False
 
 
-# Standard fonts that are known to be ATS-friendly
 ATS_FRIENDLY_FONTS = {
-    # Sans-serif fonts
     "arial", "helvetica", "calibri", "verdana", "tahoma",
     "trebuchet", "trebuchet ms", "lucida", "lucida sans",
-    # Serif fonts
     "times", "times new roman", "georgia", "garamond",
     "cambria", "palatino",
-    # Monospace (sometimes used for technical CVs)
     "courier", "courier new",
-    # Common open-source alternatives
     "noto sans", "noto serif", "roboto", "liberation sans",
     "liberation serif", "dejavu sans", "dejavu serif",
     "inter", "source sans", "source sans pro", "open sans",
     "lato", "montserrat", "raleway", "ubuntu",
 }
 
-# Expected CV sections (both English and Turkish)
 EXPECTED_SECTIONS = {
     "summary", "özet", "professional summary", "profile", "profil",
     "experience", "work experience", "deneyim", "iş deneyimi",
@@ -47,14 +40,12 @@ EXPECTED_SECTIONS = {
     "interests", "ilgi alanları",
 }
 
-# Maximum recommended file size (1MB)
 MAX_FILE_SIZE_MB = 1.0
 MAX_FILE_SIZE_BYTES = int(MAX_FILE_SIZE_MB * 1024 * 1024)
 
-# CV-specific limits
-MAX_PAGES = 5  # CVs should be 1-2 pages, max 5 for senior roles
-MAX_TEXT_LENGTH = 15000  # CVs rarely exceed 15k characters
-MIN_SECTIONS = 3  # A CV should have at least 3 recognizable sections
+MAX_PAGES = 5
+MAX_TEXT_LENGTH = 15000
+MIN_SECTIONS = 3
 
 
 @dataclass
@@ -63,8 +54,8 @@ class ATSCheck:
     name: str
     passed: bool
     message: str
-    severity: str = "info"  # info, warning, error
-    is_critical: bool = False  # If True, failing this check fails the whole report
+    severity: str = "info"
+    is_critical: bool = False
 
 
 @dataclass
@@ -85,7 +76,6 @@ class ATSReport:
         self.max_score = len(self.checks)
         self.score = sum(1 for c in self.checks if c.passed)
         
-        # If any critical check failed, mark as not a CV
         critical_failed = any(c.is_critical and not c.passed for c in self.checks)
         
         if critical_failed:
@@ -152,7 +142,6 @@ class ATSChecker:
                             font = font_dict[font_key]
                             if "/BaseFont" in font:
                                 font_name = str(font["/BaseFont"]).lstrip("/")
-                                # Clean up font name (remove subset prefix like ABCDEF+)
                                 if "+" in font_name:
                                     font_name = font_name.split("+", 1)[1]
                                 fonts.add(font_name.lower())
@@ -232,7 +221,6 @@ class ATSChecker:
         # Normalize and check fonts
         non_friendly = []
         for font in fonts:
-            # Check if any ATS-friendly font name is contained in the font name
             font_lower = font.lower()
             is_friendly = any(
                 friendly in font_lower 
@@ -251,7 +239,7 @@ class ATSChecker:
         else:
             return ATSCheck(
                 name="Font Analysis",
-                passed=True,  # Still pass, just warn
+                passed=True,
                 message=f"Found fonts: {', '.join(fonts)}. Some may not be standard.",
                 severity="warning"
             )
@@ -369,7 +357,6 @@ class ATSChecker:
         """Run all ATS checks and return a complete report."""
         report = ATSReport(file_path=str(self.pdf_path))
         
-        # Load PDF
         if not self.load_pdf():
             report.add_check(ATSCheck(
                 name="PDF Load",
@@ -380,7 +367,6 @@ class ATSChecker:
             report.calculate_score()
             return report
         
-        # Run checks
         report.add_check(self.check_file_size())
         report.add_check(self.check_page_count())
         report.add_check(self.check_text_extraction())
@@ -419,7 +405,6 @@ def format_report(report: ATSReport) -> str:
     lines.append(f"  Overall: {report.overall_verdict} ({report.score}/{report.max_score} checks passed)")
     lines.append("=" * 60)
     
-    # Add verdict message
     if report.overall_verdict == "Not a CV":
         lines.append("  ✗ This document does not appear to be a CV/Resume.")
     elif report.overall_verdict == "Excellent":
