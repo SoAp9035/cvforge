@@ -137,6 +137,16 @@ skills:
 - ✅ **11 ATS-friendly fonts**
 - ✅ **Built-in ATS checker**
 - ✅ **Optional photo support**
+- ✅ **100% Local & Private**
+
+---
+
+## 🔒 Privacy & Security
+
+CVForge operates **entirely on your local machine**. Unlike web-based resume builders, **no data is ever sent to external servers**.
+
+- **Secure**: Your personal information stays on your computer.
+- **Private**: You maintain full control over your data without uploading it to the cloud.
 
 ---
 
