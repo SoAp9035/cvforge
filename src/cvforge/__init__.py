@@ -1,6 +1,6 @@
 """
-CV Builder - ATS-friendly CV/Resume generator using YAML and Typst.
+CVForge - ATS-friendly CV/Resume generator using YAML and Typst.
 """
 
 __version__ = "1.0.1"
-__author__ = "CV Builder Contributors"
+__author__ = "CVForge Contributors"

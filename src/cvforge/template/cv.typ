@@ -1,4 +1,4 @@
-// CV Builder - ATS Friendly Typst Template
+// CVForge - ATS Friendly Typst Template
 // Supports dynamic fields, optional photo, Turkish/English, and font selection
 
 #import "@preview/ats-friendly-resume:0.1.1": *

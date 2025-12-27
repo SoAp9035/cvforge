@@ -1,4 +1,4 @@
-# CV Builder Configuration
+# CVForge Configuration
 # Language: "en" (English) or "tr" (Turkish) - affects section headings
 # Font options: "noto", "roboto", "liberation", "dejavu", "inter"
 language: "en"
