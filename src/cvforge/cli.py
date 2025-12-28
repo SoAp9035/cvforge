@@ -305,8 +305,8 @@ def ats_check(pdf_file: Path) -> int:
 def main():
     if len(sys.argv) >= 2:
         first_arg = sys.argv[1]
-        if (first_arg.endswith('.yaml') or first_arg.endswith('.yml')) and not first_arg.startswith('-'):
-            sys.exit(build_cv(Path(first_arg)))
+        if (first_arg.lower().endswith('.yaml') or first_arg.lower().endswith('.yml')) and not first_arg.startswith('-'):
+            sys.argv.insert(1, "build")
     
     parser = argparse.ArgumentParser(
         prog="cvforge",
