@@ -134,15 +134,17 @@
 #if has("education") and data.education.len() > 0 [
   == #t("education")
   #for entry in data.education [
-    #edu(
-      institution: entry.at("school", default: ""),
-      degree: entry.at("degree", default: ""),
-      dates: entry.at("date", default: ""),
-      location: entry.at("location", default: get("location", default: "")),
-    )
-    #if "description" in entry [
-      #for bullet in entry.description [
-        - #bullet
+    #block(spacing: 0.65em)[
+      #edu(
+        institution: entry.at("school", default: ""),
+        degree: entry.at("degree", default: ""),
+        dates: entry.at("date", default: ""),
+        location: entry.at("location", default: get("location", default: "")),
+      )
+      #if "description" in entry [
+        #for bullet in entry.description [
+          - #bullet
+        ]
       ]
     ]
   ]
