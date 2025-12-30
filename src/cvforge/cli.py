@@ -32,6 +32,8 @@ FONT_OPTIONS = {
     "sourcesans": ("Source Sans Pro", ["Noto Sans", "DejaVu Sans", "Arial"]),
 }
 
+DEFAULT_TEMPLATE = "ats-friendly-resume"
+
 LANGUAGE_OPTIONS = ["en", "tr"]
 
 SECTION_TRANSLATIONS = {
@@ -60,9 +62,14 @@ SECTION_TRANSLATIONS = {
 }
 
 
-def get_template_dir() -> Path:
-    """Get the path to the template directory."""
-    return Path(__file__).parent / "template"
+def get_templates_dir() -> Path:
+    """Get the path to the templates directory."""
+    return Path(__file__).parent / "templates"
+
+
+def get_template_dir(template_name: str = DEFAULT_TEMPLATE) -> Path:
+    """Get the path to a specific template directory."""
+    return get_templates_dir() / template_name
 
 
 def check_typst_installed() -> bool:
