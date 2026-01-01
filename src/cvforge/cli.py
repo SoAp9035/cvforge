@@ -153,7 +153,7 @@ def build_cv(input_file: Path) -> int:
     output_file = input_file.with_suffix('.pdf').resolve()
     
     template_dir = get_template_dir()
-    typst_file = template_dir / "cv.typ"
+    typst_file = template_dir / "main.typ"
     
     if not typst_file.exists():
         print(f"Error: Typst template '{typst_file}' not found.", file=sys.stderr)
@@ -252,7 +252,7 @@ def init_template(output_dir: Path) -> int:
         0 on success, 1 on failure
     """
     template_dir = get_template_dir()
-    example_yaml = template_dir / "cv.yaml.example"
+    example_yaml = template_dir / "example.yaml"
     
     if not example_yaml.exists():
         print(f"Error: Example template not found.", file=sys.stderr)
