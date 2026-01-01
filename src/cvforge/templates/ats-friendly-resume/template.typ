@@ -1,7 +1,6 @@
 // ATS-Friendly Resume Template
-// Source: https://github.com/aybangueco/ats-friendly-resume
-// Version: 0.1.1
-// License: Unlicense
+// Source: https://github.com/SoAp9035/cvforge
+// License: MIT
 
 #let resume(
   // Name of the author (you)
