@@ -151,21 +151,23 @@
   tech-used: "",
   location: "",
 ) = {
-  if tech-used == "" {
-    two-by-two-layout(
-      top-left: strong(company),
-      top-right: dates,
-      bottom-left: role,
-      bottom-right: emph(location),
-    )
-  } else {
-    two-by-two-layout(
-      top-left: strong(company) + " " + "|" + " " + strong(role),
-      top-right: dates,
-      bottom-left: tech-used,
-      bottom-right: emph(location),
-    )
-  }
+  block(spacing: 0.65em)[
+    #if tech-used == "" [
+      #two-by-two-layout(
+        top-left: strong(company),
+        top-right: dates,
+        bottom-left: role,
+        bottom-right: emph(location),
+      )
+    ] else [
+      #two-by-two-layout(
+        top-left: strong(company) + " " + "|" + " " + strong(role),
+        top-right: dates,
+        bottom-left: tech-used,
+        bottom-right: emph(location),
+      )
+    ]
+  ]
 }
 
 // Project Component
@@ -177,19 +179,21 @@
   tech-used: "",
   url: "",
 ) = {
-  if tech-used == "" {
-    one-by-one-layout(
-      left: [*#name* #if url != "" and dates != "" [(#link("https://" + url)[#url])]],
-      right: dates,
-    )
-  } else {
-    two-by-two-layout(
-      top-left: strong(name),
-      top-right: dates,
-      bottom-left: tech-used,
-      bottom-right: [(#link("https://" + url)[#url])],
-    )
-  }
+  block(spacing: 0.65em)[
+    #if tech-used == "" [
+      #one-by-one-layout(
+        left: [*#name* #if url != "" and dates != "" [(#link("https://" + url)[#url])]],
+        right: dates,
+      )
+    ] else [
+      #two-by-two-layout(
+        top-left: strong(name),
+        top-right: dates,
+        bottom-left: tech-used,
+        bottom-right: [(#link("https://" + url)[#url])],
+      )
+    ]
+  ]
 }
 
 // Education Component
@@ -199,10 +203,12 @@
   degree: "",
   dates: "",
 ) = {
-  two-by-two-layout(
-    top-left: strong(institution),
-    top-right: location,
-    bottom-left: degree,
-    bottom-right: dates,
-  )
+  block(spacing: 0.65em)[
+    #two-by-two-layout(
+      top-left: strong(institution),
+      top-right: location,
+      bottom-left: degree,
+      bottom-right: dates,
+    )
+  ]
 }
