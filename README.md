@@ -1,82 +1,90 @@
 # CVForge
 
-**CVForge** is a straightforward, YAML-based, ATS-compatible CV/Resume generator powered by [Typst](https://typst.app/). Create professional, machine-readable resumes in seconds.
+A YAML-based, ATS-compatible CV/Resume generator powered by [Typst](https://typst.app/).
 
 ---
 
-## 🚀 Quick Start
+## Why This Tool?
 
-### Using UV (Recommended)
+I created CVForge because I needed a fast, reliable way to build and rebuild my resume without:
 
-The fastest way to use CVForge is with [uv](https://docs.astral.sh/uv/), which is significantly faster and keeps tools isolated.
+- Using Word or clunky desktop apps
+- Trusting random online resume builders with my personal data
+- Spending time on formatting instead of content
 
-```bash
-# Run instantly without installing (creates a temp environment)
-uvx cvforge init        # Create a template cv.yaml
-uvx cvforge cv.yaml     # Build your CV
+CVForge lets you define your CV once in YAML and regenerate it instantly. Change a job title, add a skill, rebuild — done. **100% local, 100% private.**
 
-# Or install globally as a tool
-uv tool install cvforge
-cvforge cv.yaml
-```
-
-### Using Pip
-
-CVForge is available on PyPI and can be installed with standard `pip`:
-
-```bash
-pip install cvforge
-cvforge cv.yaml
-```
+> **Note:** I'm planning to re-build this tool from scratch with no vibe coding.
 
 ---
 
-## 📋 Requirements
+## Requirements
 
-- **[Typst](https://github.com/typst/typst)**: The Typst CLI must be installed and available in your `PATH`.
+- **[Typst](https://github.com/typst/typst)**: Must be installed and available in your `PATH`
 - **Python 3.8+**
 
 ---
 
-## 📖 Usage
+## Installation
 
-| Command | Description |
-|---------|-------------|
-| `cvforge init` | Creates a template `cv.yaml` in the current directory. |
-| `cvforge <file.yaml>` | Generates a PDF from the specified YAML file. |
-| `cvforge fonts` | Lists all available ATS-friendly fonts. |
-| `cvforge ats-check <file.pdf>` | Analyzes a PDF for ATS compatibility. |
-| `cvforge --help` | Shows help information. |
-
-### Examples
+### Using UV (Recommended)
 
 ```bash
-# Initialize a new CV project
-cvforge init
+# Run without installing
+uvx cvforge init
+uvx cvforge cv.yaml
 
-# Build CV from default cv.yaml
+# Or install as a tool
+uv tool install cvforge
 cvforge cv.yaml
 
-# Build from any YAML file
-cvforge resume.yaml
+# Update
+uv tool upgrade cvforge
 
-# Check if your PDF is ATS-friendly
-cvforge ats-check cv.pdf
+# Uninstall
+uv tool uninstall cvforge
+```
+
+### Using Pip
+
+```bash
+# Install
+pip install cvforge
+
+# Update
+pip install --upgrade cvforge
+
+# Use
+cvforge cv.yaml
 ```
 
 ---
 
-## ⚙️ Configuration
+## Usage
+
+| Command | Description |
+|---------|-------------|
+| `cvforge init` | Creates a template `cv.yaml` |
+| `cvforge <file.yaml>` | Generates PDF from YAML |
+| `cvforge fonts` | Lists available fonts |
+| `cvforge ats-check <file.pdf>` | Checks PDF for ATS compatibility |
+
+---
+
+## Configuration
 
 ### Language
+
+The `language` parameter controls the **section headings** in your CV (e.g., "Experience" vs "Deneyim"). It does not translate your content.
+
 ```yaml
-language: "en"  # English (default)
-language: "tr"  # Turkish
+language: "en"  # English headings (default)
+language: "tr"  # Turkish headings
 ```
 
 ### Fonts
 
-All fonts are ATS-friendly. Use `cvforge fonts` to see the full list.
+Run `cvforge fonts` to see available options. The font must be installed on your system.
 
 ```yaml
 font: "roboto"  # Options: noto, roboto, inter, lato, montserrat, opensans, etc.
@@ -84,17 +92,13 @@ font: "roboto"  # Options: noto, roboto, inter, lato, montserrat, opensans, etc.
 
 ---
 
-## 📝 YAML Structure
+## YAML Structure
 
 ```yaml
-# Configuration
 language: "en"
 font: "noto"
 
-# Required
 name: "Your Name"
-
-# Optional
 role: "Software Engineer"
 email: "hello@example.com"
 phone: "+1 555 123 4567"
@@ -124,55 +128,23 @@ skills:
   - Category: "Languages"
     Items: ["Python", "Rust", "TypeScript"]
 
-# Additional sections: projects, languages, certifications, awards, interests
+# Additional: projects, languages, certifications, awards, interests
 ```
 
 ---
 
-## ✨ Features
+## Features
 
-- ✅ **Cross-platform**: Linux, Windows, macOS
-- ✅ **ATS Compatible**: Clean, selectable text
-- ✅ **Multi-language**: English and Turkish section headings
-- ✅ **11 ATS-friendly fonts**
-- ✅ **Built-in ATS checker**
-- ✅ **Optional photo support**
-- ✅ **100% Local & Private**
-
----
-
-## 🔒 Privacy & Security
-
-CVForge operates **entirely on your local machine**. Unlike web-based resume builders, **no data is ever sent to external servers**.
-
-- **Secure**: Your personal information stays on your computer.
-- **Private**: You maintain full control over your data without uploading it to the cloud.
+- **Cross-platform**: Linux, Windows, macOS
+- **ATS Compatible**: Clean, parseable text
+- **Multi-language**: EN/TR section headings
+- **11 fonts** available
+- **Built-in ATS checker**
+- **Photo support**
+- **100% Local & Private**
 
 ---
 
-## 📦 Tool Management with UV
-
-If you installed CVForge with `uv tool install`:
-
-```bash
-# Upgrade to latest version
-uv tool upgrade cvforge
-
-# Run a specific version
-uvx cvforge@1.0.0
-
-# Uninstall
-uv tool uninstall cvforge
-```
-
----
-
-## 🤖 A Note
-
-This project was fully **vibe coded** — built with AI assistance. ✨
-
----
-
-## 📜 License
+## License
 
 MIT
