@@ -1,6 +1,6 @@
 # CVForge Configuration
 # Language: "en" (English) or "tr" (Turkish) - affects section headings
-# Font options: "noto", "roboto", "liberation", "dejavu", "inter", "arial", "times", "calibri", "georgia", "garamond", "trebuchet"
+# Font options: "noto", "roboto", "liberation", "dejavu", "inter", "lato", "montserrat", "raleway", "ubuntu", "opensans", "sourcesans", "arial", "times", "calibri", "georgia", "garamond", "trebuchet"
 language: "en"
 font: "noto"
 
