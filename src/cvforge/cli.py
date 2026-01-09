@@ -30,7 +30,15 @@ FONT_OPTIONS = {
     "ubuntu": ("Ubuntu", ["Noto Sans", "DejaVu Sans", "Arial"]),
     "opensans": ("Open Sans", ["Noto Sans", "DejaVu Sans", "Arial"]),
     "sourcesans": ("Source Sans Pro", ["Noto Sans", "DejaVu Sans", "Arial"]),
+    "arial": ("Arial", ["Liberation Sans", "Noto Sans", "DejaVu Sans"]),
+    "times": ("Times New Roman", ["Times", "Liberation Serif", "Noto Serif"]),
+    "calibri": ("Calibri", ["Carlito", "Liberation Sans", "Arial"]),
+    "georgia": ("Georgia", ["Gelasio", "Liberation Serif", "Noto Serif"]),
+    "garamond": ("Garamond", ["EB Garamond", "Liberation Serif", "Noto Serif"]),
+    "trebuchet": ("Trebuchet MS", ["Fira Sans", "Liberation Sans", "Arial"]),
 }
+
+DEFAULT_TEMPLATE = "ats-friendly-resume"
 
 LANGUAGE_OPTIONS = ["en", "tr"]
 
@@ -60,9 +68,14 @@ SECTION_TRANSLATIONS = {
 }
 
 
-def get_template_dir() -> Path:
-    """Get the path to the template directory."""
-    return Path(__file__).parent / "template"
+def get_templates_dir() -> Path:
+    """Get the path to the templates directory."""
+    return Path(__file__).parent / "templates"
+
+
+def get_template_dir(template_name: str = DEFAULT_TEMPLATE) -> Path:
+    """Get the path to a specific template directory."""
+    return get_templates_dir() / template_name
 
 
 def check_typst_installed() -> bool:
@@ -146,7 +159,7 @@ def build_cv(input_file: Path) -> int:
     output_file = input_file.with_suffix('.pdf').resolve()
     
     template_dir = get_template_dir()
-    typst_file = template_dir / "cv.typ"
+    typst_file = template_dir / "main.typ"
     
     if not typst_file.exists():
         print(f"Error: Typst template '{typst_file}' not found.", file=sys.stderr)
@@ -245,10 +258,10 @@ def init_template(output_dir: Path) -> int:
         0 on success, 1 on failure
     """
     template_dir = get_template_dir()
-    example_yaml = template_dir / "cv.yaml.example"
+    example_yaml = template_dir / "example.yaml"
     
     if not example_yaml.exists():
-        print(f"Error: Example template not found.", file=sys.stderr)
+        print("Error: Example template not found.", file=sys.stderr)
         return 1
     
     output_file = output_dir / "cv.yaml"
@@ -305,8 +318,8 @@ def ats_check(pdf_file: Path) -> int:
 def main():
     if len(sys.argv) >= 2:
         first_arg = sys.argv[1]
-        if (first_arg.endswith('.yaml') or first_arg.endswith('.yml')) and not first_arg.startswith('-'):
-            sys.exit(build_cv(Path(first_arg)))
+        if (first_arg.lower().endswith('.yaml') or first_arg.lower().endswith('.yml')) and not first_arg.startswith('-'):
+            sys.argv.insert(1, "build")
     
     parser = argparse.ArgumentParser(
         prog="cvforge",

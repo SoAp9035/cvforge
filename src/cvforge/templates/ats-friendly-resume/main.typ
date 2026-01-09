@@ -1,4 +1,4 @@
-#import "@preview/ats-friendly-resume:0.1.1": *
+#import "./template.typ": *
 
 #let cv_data_path = sys.inputs.at("cv_data", default: "cv.yaml")
 #let data = yaml(cv_data_path)

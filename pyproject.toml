@@ -1,6 +1,6 @@
 [project]
 name = "cvforge"
-version = "1.0.1"
+version = "1.0.2"
 description = "ATS-friendly CV/Resume builder using YAML and Typst"
 readme = "README.md"
 authors = [
@@ -32,9 +32,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/SoAp9035/cv-forge"
-Repository = "https://github.com/SoAp9035/cv-forge"
-Issues = "https://github.com/SoAp9035/cv-forge/issues"
+Homepage = "https://github.com/SoAp9035/cvforge"
+Repository = "https://github.com/SoAp9035/cvforge"
+Issues = "https://github.com/SoAp9035/cvforge/issues"
 
 [project.scripts]
 cvforge = "cvforge.cli:main"
