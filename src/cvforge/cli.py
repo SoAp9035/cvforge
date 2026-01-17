@@ -263,6 +263,13 @@ def init_template(output_dir: Path) -> int:
     if not example_yaml.exists():
         print("Error: Example template not found.", file=sys.stderr)
         return 1
+
+    output_dir = output_dir.resolve()
+    if output_dir.exists() and not output_dir.is_dir():
+        print(f"Error: {output_dir} is not a directory.", file=sys.stderr)
+        return 1
+
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     output_file = output_dir / "cv.yaml"
     
