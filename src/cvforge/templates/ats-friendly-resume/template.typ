@@ -196,17 +196,20 @@
 }
 
 // Education Component
+//
+// Optional arguments: gpa
 #let edu(
   institution: "",
   location: "",
   degree: "",
   dates: "",
+  gpa: "",
 ) = {
   block(spacing: 0.65em)[
     #two-by-two-layout(
       top-left: strong(institution),
       top-right: location,
-      bottom-left: degree,
+      bottom-left: if gpa != "" { degree + " | GPA: " + gpa } else { degree },
       bottom-right: dates,
     )
   ]

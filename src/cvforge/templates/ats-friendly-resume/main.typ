@@ -139,6 +139,7 @@
       degree: entry.at("degree", default: ""),
       dates: entry.at("date", default: ""),
       location: entry.at("location", default: get("location", default: "")),
+      gpa: entry.at("gpa", default: ""),
     )
     #if "description" in entry [
       #for bullet in entry.description [

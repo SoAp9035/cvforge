@@ -44,6 +44,7 @@ education:
     degree: "Degree Type in Field of Study"
     date: "2016 - 2020"
     location: "City, Country"  # Optional
+    gpa: "3.8/4.0"  # Optional
 
 # Technical Skills (grouped by category)
 skills:
