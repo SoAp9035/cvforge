@@ -23,8 +23,8 @@
   linkedin-text: "LinkedIn",
   github: "",
   github-text: "GitHub",
-  portfolio: "",
-  portfolio-text: "Portfolio",
+  website: "",
+  website-text: "Website",
   personal-info-position: center,
   // Document values and format
   color-enabled: true,
@@ -98,7 +98,7 @@
           contact-item(email, link-type: "mailto:"),
           contact-item(github, link-type: "https://", display-text: github-text),
           contact-item(linkedin, link-type: "https://", display-text: linkedin-text),
-          contact-item(portfolio, link-type: "https://", display-text: portfolio-text),
+          contact-item(website, link-type: "https://", display-text: website-text),
         )
         items.filter(x => x != none).join("  |  ")
       }
