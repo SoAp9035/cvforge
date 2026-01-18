@@ -2,6 +2,15 @@
 // Source: https://github.com/SoAp9035/cvforge
 // License: MIT
 
+// Helper function to normalize URLs (avoid double https://)
+#let normalize-url(url) = {
+  if url.starts-with("https://") or url.starts-with("http://") {
+    url
+  } else {
+    "https://" + url
+  }
+}
+
 #let resume(
   // Name of the author (you)
   author: "",
@@ -63,7 +72,11 @@
   let contact-item(value, prefix: "", link-type: "") = {
     if value != "" {
       if link-type != "" {
-        link(link-type + value)[#(prefix + value)]
+        if link-type == "https://" {
+          link(normalize-url(value))[#value]
+        } else {
+          link(link-type + value)[#(prefix + value)]
+        }
       } else {
         value
       }
@@ -181,7 +194,7 @@
   block(spacing: 0.65em)[
     #if tech-used == "" [
       #one-by-one-layout(
-        left: [*#name* #if url != "" and dates != "" [(#link("https://" + url)[#url])]],
+        left: [*#name* #if url != "" and url != none and dates != "" [(#link(normalize-url(url))[#url])]],
         right: dates,
       )
     ] else [
@@ -189,7 +202,7 @@
         top-left: strong(name),
         top-right: dates,
         bottom-left: tech-used,
-        bottom-right: [(#link("https://" + url)[#url])],
+        bottom-right: if url != "" and url != none [(#link(normalize-url(url))[#url])] else [],
       )
     ]
   ]
