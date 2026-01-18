@@ -20,8 +20,11 @@
   email: "",
   phone: "",
   linkedin: "",
+  linkedin-text: "LinkedIn",
   github: "",
+  github-text: "GitHub",
   portfolio: "",
+  portfolio-text: "Portfolio",
   personal-info-position: center,
   // Document values and format
   color-enabled: true,
@@ -69,13 +72,16 @@
   [= #(author)]
 
   // Personal Information
-  let contact-item(value, prefix: "", link-type: "") = {
+  // display-text: optional text to show instead of the raw URL
+  let contact-item(value, prefix: "", link-type: "", display-text: "") = {
     if value != "" {
       if link-type != "" {
+        // Use display-text if provided, otherwise fall back to the value
+        let shown-text = if display-text != "" { display-text } else { value }
         if link-type == "https://" {
-          link(normalize-url(value))[#value]
+          link(normalize-url(value))[#shown-text]
         } else {
-          link(link-type + value)[#(prefix + value)]
+          link(link-type + value)[#(prefix + shown-text)]
         }
       } else {
         value
@@ -84,15 +90,15 @@
   }
   pad(
     top: 0.25em,
-    align(personal-info-position)[
+    align(personal-info-position)[\
       #{
         let items = (
           contact-item(phone),
           contact-item(location),
           contact-item(email, link-type: "mailto:"),
-          contact-item(github, link-type: "https://"),
-          contact-item(linkedin, link-type: "https://"),
-          contact-item(portfolio, link-type: "https://"),
+          contact-item(github, link-type: "https://", display-text: github-text),
+          contact-item(linkedin, link-type: "https://", display-text: linkedin-text),
+          contact-item(portfolio, link-type: "https://", display-text: portfolio-text),
         )
         items.filter(x => x != none).join("  |  ")
       }
@@ -184,17 +190,20 @@
 
 // Project Component
 //
-// Optional arguments: tech-used
+// Optional arguments: tech-used, url-text
 #let project(
   name: "",
   dates: "",
   tech-used: "",
   url: "",
+  url-text: "",
 ) = {
+  // Use url-text if provided, otherwise fall back to the URL itself
+  let display-text = if url-text != "" { url-text } else { url }
   block(spacing: 0.65em)[
     #if tech-used == "" [
       #one-by-one-layout(
-        left: [*#name* #if url != "" and url != none and dates != "" [(#link(normalize-url(url))[#url])]],
+        left: [*#name* #if url != "" and url != none and dates != "" [(#link(normalize-url(url))[#display-text])]],
         right: dates,
       )
     ] else [
@@ -202,7 +211,7 @@
         top-left: strong(name),
         top-right: dates,
         bottom-left: tech-used,
-        bottom-right: if url != "" and url != none [(#link(normalize-url(url))[#url])] else [],
+        bottom-right: if url != "" and url != none [(#link(normalize-url(url))[#display-text])] else [],
       )
     ]
   ]

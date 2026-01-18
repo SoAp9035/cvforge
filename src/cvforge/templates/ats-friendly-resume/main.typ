@@ -73,8 +73,11 @@
   email: get("email", default: ""),
   phone: get("phone", default: ""),
   linkedin: get("linkedin", default: ""),
+  linkedin-text: get("linkedin-text", default: "LinkedIn"),
   github: get("github", default: ""),
+  github-text: get("github-text", default: "GitHub"),
   portfolio: get("website", default: ""),
+  portfolio-text: get("website-text", default: "Portfolio"),
   personal-info-position: center,
   color-enabled: false,
   font: font_family,
@@ -156,6 +159,7 @@
       name: proj.at("name", default: ""),
       dates: proj.at("date", default: ""),
       url: proj.at("url", default: none),
+      url-text: proj.at("url-text", default: ""),
     )
     #if "role" in proj [
       #text(style: "italic")[#proj.role]
