@@ -11,8 +11,11 @@ email: "your.email@example.com"
 phone: "+1 555 123 4567"
 location: "City, Country"
 website: "yourwebsite.com"
+# website-text: "Portfolio" # Optional: Custom display text (default: "Website")
 linkedin: "linkedin.com/in/yourprofile"
+# linkedin-text: "LinkedIn Profile" # Optional: Custom display text (default: "LinkedIn")
 github: "github.com/yourusername"
+# github-text: "GitHub Profile" # Optional: Custom display text (default: "GitHub")
 # photo: "photo.png"  # Optional: uncomment and add path to your photo
 
 # Professional Summary
@@ -60,6 +63,7 @@ projects:
   - name: "Project Name"
     date: "2023"
     url: "github.com/username/project"  # Optional
+    # url-text: "View Code" # Optional: Custom display text (default: shows raw URL)
     role: "Lead Developer"  # Optional
     description:
       - "Brief description of the project and your contribution"
