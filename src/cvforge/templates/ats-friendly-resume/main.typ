@@ -124,7 +124,7 @@
       company: job.at("company", default: ""),
       role: job.at("role", default: ""),
       dates: job.at("date", default: ""),
-      location: job.at("location", default: get("location", default: "")),
+      location: job.at("location", default: ""),
     )
     #if "description" in job [
       #for bullet in job.description [
@@ -141,7 +141,7 @@
       institution: entry.at("school", default: ""),
       degree: entry.at("degree", default: ""),
       dates: entry.at("date", default: ""),
-      location: entry.at("location", default: get("location", default: "")),
+      location: entry.at("location", default: ""),
       gpa: entry.at("gpa", default: ""),
     )
     #if "description" in entry [
