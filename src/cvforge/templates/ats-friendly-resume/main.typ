@@ -11,6 +11,14 @@
   field in data and data.at(field) != none and data.at(field) != ""
 }
 
+#let has-text(val) = {
+  val != none and val != ""
+}
+
+#let has-list(val) = {
+  val != none and val.len() > 0
+}
+
 #let font_map = (
   "noto": ("Noto Sans", "DejaVu Sans", "Liberation Sans", "Arial"),
   "roboto": ("Roboto", "Noto Sans", "DejaVu Sans", "Arial"),
@@ -105,95 +113,81 @@
   #v(0.5em)
 ]
 
-#if has("summary") [
-  == #t("summary")
-  #data.summary
-]
-
-#if has("skills") and data.skills.len() > 0 [
-  == #t("skills")
-  #for skill in data.skills [
-    - *#skill.Category*: #skill.Items.join(", ")
-  ]
-]
-
-#if has("experience") and data.experience.len() > 0 [
-  == #t("experience")
-  #for job in data.experience [
-    #work(
-      company: job.at("company", default: ""),
-      role: job.at("role", default: ""),
-      dates: job.at("date", default: ""),
-      location: job.at("location", default: ""),
-    )
-    #if "description" in job [
-      #for bullet in job.description [
-        - #bullet
+#for (key, val) in data.pairs() {
+  if key == "summary" and has-text(val) [
+    == #t("summary")
+    #val
+  ] else if key == "skills" and has-list(val) [
+    == #t("skills")
+    #for skill in val [
+      - *#skill.Category*: #skill.Items.join(", ")
+    ]
+  ] else if key == "experience" and has-list(val) [
+    == #t("experience")
+    #for job in val [
+      #work(
+        company: job.at("company", default: ""),
+        role: job.at("role", default: ""),
+        dates: job.at("date", default: ""),
+        location: job.at("location", default: ""),
+      )
+      #if "description" in job [
+        #for bullet in job.description [
+          - #bullet
+        ]
       ]
     ]
-  ]
-]
-
-#if has("education") and data.education.len() > 0 [
-  == #t("education")
-  #for entry in data.education [
-    #edu(
-      institution: entry.at("school", default: ""),
-      degree: entry.at("degree", default: ""),
-      dates: entry.at("date", default: ""),
-      location: entry.at("location", default: ""),
-      gpa: entry.at("gpa", default: ""),
-    )
-    #if "description" in entry [
-      #for bullet in entry.description [
-        - #bullet
+  ] else if key == "education" and has-list(val) [
+    == #t("education")
+    #for entry in val [
+      #edu(
+        institution: entry.at("school", default: ""),
+        degree: entry.at("degree", default: ""),
+        dates: entry.at("date", default: ""),
+        location: entry.at("location", default: ""),
+        gpa: entry.at("gpa", default: ""),
+      )
+      #if "description" in entry [
+        #for bullet in entry.description [
+          - #bullet
+        ]
       ]
     ]
-  ]
-]
-
-#if has("projects") and data.projects.len() > 0 [
-  == #t("projects")
-  #for proj in data.projects [
-    #project(
-      name: proj.at("name", default: ""),
-      dates: proj.at("date", default: ""),
-      url: proj.at("url", default: none),
-      url-text: proj.at("url-text", default: ""),
-    )
-    #if "role" in proj [
-      #text(style: "italic")[#proj.role]
-    ]
-    #if "description" in proj [
-      #for bullet in proj.description [
-        - #bullet
+  ] else if key == "projects" and has-list(val) [
+    == #t("projects")
+    #for proj in val [
+      #project(
+        name: proj.at("name", default: ""),
+        dates: proj.at("date", default: ""),
+        url: proj.at("url", default: none),
+        url-text: proj.at("url-text", default: ""),
+      )
+      #if "role" in proj [
+        #text(style: "italic")[#proj.role]
+      ]
+      #if "description" in proj [
+        #for bullet in proj.description [
+          - #bullet
+        ]
       ]
     ]
+  ] else if key == "languages" and has-list(val) [
+    == #t("languages")
+    #for lang_item in val [
+      - *#lang_item.at("name", default: "")*: #lang_item.at("level", default: "")
+    ]
+  ] else if key == "certifications" and has-list(val) [
+    == #t("certifications")
+    #for cert in val [
+      - *#cert.at("name", default: "")* #if "issuer" in cert [(#cert.issuer)] #if "date" in cert [- #cert.date]
+    ]
+  ] else if key == "awards" and has-list(val) [
+    == #t("awards")
+    #for award in val [
+      - *#award.at("name", default: "")* #if "issuer" in award [(#award.issuer)] #if "date" in award [- #award.date]
+    ]
+  ] else if key == "interests" and has-list(val) [
+    == #t("interests")
+    #val.join(" • ")
   ]
-]
-
-#if has("languages") and data.languages.len() > 0 [
-  == #t("languages")
-  #for lang_item in data.languages [
-    - *#lang_item.at("name", default: "")*: #lang_item.at("level", default: "")
-  ]
-]
-
-#if has("certifications") and data.certifications.len() > 0 [
-  == #t("certifications")
-  #for cert in data.certifications [
-    - *#cert.at("name", default: "")* #if "issuer" in cert [(#cert.issuer)] #if "date" in cert [- #cert.date]
-  ]
-]
-
-#if has("awards") and data.awards.len() > 0 [
-  == #t("awards")
-  #for award in data.awards [
-    - *#award.at("name", default: "")* #if "issuer" in award [(#award.issuer)] #if "date" in award [- #award.date]
-  ]
-]
-
-#if has("interests") and data.interests.len() > 0 [
-  == #t("interests")
-  #data.interests.join(" • ")
-]
+}
