@@ -167,7 +167,7 @@ def build_cv(input_file: Path) -> int:
     
     if not check_typst_installed():
         print("Error: Typst is not installed or not in PATH.", file=sys.stderr)
-        print("Install Typst from: https://typst.app/", file=sys.stderr)
+        print("Install Typst from: https://github.com/typst/typst", file=sys.stderr)
         return 1
     
     input_abs = input_file.resolve()
