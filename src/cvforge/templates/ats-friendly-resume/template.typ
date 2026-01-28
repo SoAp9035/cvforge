@@ -14,7 +14,11 @@
 #let resume(
   // Name of the author (you)
   author: "",
-  author-position: center,
+  author-position: left,
+  // Role/Position
+  role: "",
+  // Photo (optional)
+  photo: none,
   // Personal Information
   location: "",
   email: "",
@@ -25,7 +29,7 @@
   github-text: "GitHub",
   website: "",
   website-text: "Website",
-  personal-info-position: center,
+  personal-info-position: left,
   // Document values and format
   color-enabled: true,
   text-color: "#000080",
@@ -58,19 +62,6 @@
   // Link styles
   show link: underline
 
-  // Name will be aligned to center, bold and big
-  show heading.where(level: 1): it => [
-    #set align(author-position)
-    #set text(
-      weight: "bold",
-      size: author-font-size,
-    )
-    #pad(it.body)
-  ]
-
-  // Level 1 Heading
-  [= #(author)]
-
   // Personal Information
   // display-text: optional text to show instead of the raw URL
   let contact-item(value, prefix: "", link-type: "", display-text: "") = {
@@ -88,22 +79,56 @@
       }
     }
   }
-  pad(
-    top: 0.25em,
-    align(personal-info-position)[\
-      #{
-        let items = (
-          contact-item(phone),
-          contact-item(location),
-          contact-item(email, link-type: "mailto:"),
-          contact-item(github, link-type: "https://", display-text: github-text),
-          contact-item(linkedin, link-type: "https://", display-text: linkedin-text),
-          contact-item(website, link-type: "https://", display-text: website-text),
+
+  // Build contact items list
+  let contact-items = (
+    contact-item(phone),
+    contact-item(location),
+    contact-item(email, link-type: "mailto:"),
+    contact-item(github, link-type: "https://", display-text: github-text),
+    contact-item(linkedin, link-type: "https://", display-text: linkedin-text),
+    contact-item(website, link-type: "https://", display-text: website-text),
+  ).filter(x => x != none)
+
+  // Header layout: Name, role, and contact on left; photo on right (if provided)
+  // ATS-friendly: text is plain and accessible, photo is decorative only
+  if photo != none {
+    grid(
+      columns: (1fr, auto),
+      column-gutter: 1em,
+      align: (left + horizon, right + horizon),
+      [
+        #text(weight: "bold", size: author-font-size, fill: if color-enabled { rgb(text-color) } else { black })[#author]
+        #if role != "" [
+          #v(0.2em)
+          #text(size: 12pt, style: "italic")[#role]
+        ]
+        #v(0.3em)
+        #text(size: font-size)[#contact-items.join("  |  ")]
+      ],
+      [
+        #box(
+          clip: true,
+          radius: 4pt,
+          stroke: 0.5pt + luma(200),
+          image(photo, width: 2.5cm)
         )
-        items.filter(x => x != none).join("  |  ")
-      }
-    ],
-  )
+      ],
+    )
+  } else {
+    // No photo: display header aligned to author-position
+    align(author-position)[
+      #text(weight: "bold", size: author-font-size, fill: if color-enabled { rgb(text-color) } else { black })[#author]
+      #if role != "" [
+        #v(0.2em)
+        #text(size: 12pt, style: "italic")[#role]
+      ]
+      #v(0.3em)
+      #text(size: font-size)[#contact-items.join("  |  ")]
+    ]
+  }
+  
+  v(0.5em)
 
   show heading.where(level: 2): it => [
     #pad(top: 0pt, bottom: -10pt, [#smallcaps(it.body)])

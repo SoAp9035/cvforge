@@ -76,7 +76,9 @@
 
 #show: resume.with(
   author: get("name", default: "Name"),
-  author-position: center,
+  author-position: left,
+  role: get("role", default: ""),
+  photo: if has("photo") { data.photo } else { none },
   location: get("location", default: ""),
   email: get("email", default: ""),
   phone: get("phone", default: ""),
@@ -86,7 +88,7 @@
   github-text: get("github-text", default: "GitHub"),
   website: get("website", default: ""),
   website-text: get("website-text", default: "Website"),
-  personal-info-position: center,
+  personal-info-position: left,
   color-enabled: false,
   font: font_family,
   paper: "a4",
@@ -94,24 +96,6 @@
   font-size: 10pt,
   lang: lang,
 )
-
-#if has("photo") or has("role") [
-  #align(center)[
-    #if has("photo") [
-      #box(
-        clip: true,
-        radius: 4pt,
-        stroke: 0.5pt + luma(200),
-        image(data.photo, width: 2.5cm)
-      )
-      #v(0.3em)
-    ]
-    #if has("role") [
-      #text(size: 12pt, style: "italic")[#data.role]
-    ]
-  ]
-  #v(0.5em)
-]
 
 #for (key, val) in data.pairs() {
   if key == "summary" and has-text(val) [
