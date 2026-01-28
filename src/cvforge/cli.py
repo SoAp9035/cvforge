@@ -207,6 +207,31 @@ def build_cv(input_file: Path) -> int:
             if photo_path != photo_in_template_dir.resolve():
                 shutil.copy2(photo_path, photo_in_template_dir)
                 temp_photo_copy = True
+            if yaml_in_template_dir.exists():
+                try:
+                    if YAML_AVAILABLE:
+                        with open(yaml_in_template_dir, 'r', encoding='utf-8') as f:
+                            yaml_data = yaml.safe_load(f) or {}
+                        yaml_data["photo"] = photo_in_template_dir.name
+                        with open(yaml_in_template_dir, 'w', encoding='utf-8') as f:
+                            yaml.safe_dump(yaml_data, f, sort_keys=False, allow_unicode=True)
+                    else:
+                        with open(yaml_in_template_dir, 'r', encoding='utf-8') as f:
+                            lines = f.readlines()
+                        updated = False
+                        for i, line in enumerate(lines):
+                            stripped = line.lstrip()
+                            if stripped.startswith("photo:"):
+                                indent = line[: len(line) - len(stripped)]
+                                lines[i] = f"{indent}photo: \"{photo_in_template_dir.name}\"\n"
+                                updated = True
+                                break
+                        if not updated:
+                            lines.append(f"photo: \"{photo_in_template_dir.name}\"\n")
+                        with open(yaml_in_template_dir, 'w', encoding='utf-8') as f:
+                            f.writelines(lines)
+                except Exception:
+                    pass
         else:
             print(f"Warning: Photo file '{photo_path_str}' not found.", file=sys.stderr)
     
