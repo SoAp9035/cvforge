@@ -19,6 +19,7 @@
   role: "",
   // Photo (optional)
   photo: none,
+  photo-width: 2.5cm,
   // Personal Information
   location: "",
   email: "",
@@ -111,7 +112,7 @@
           clip: true,
           radius: 4pt,
           stroke: 0.5pt + luma(200),
-          image(photo, width: 2.5cm)
+          image(photo, width: photo-width)
         )
       ],
     )

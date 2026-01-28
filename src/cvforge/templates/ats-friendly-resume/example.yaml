@@ -17,6 +17,7 @@ linkedin: "linkedin.com/in/yourprofile"
 github: "github.com/yourusername"
 # github-text: "GitHub Profile" # Optional: Custom display text (default: "GitHub")
 # photo: "photo.png"  # Optional: uncomment and add path to your photo
+# photo-width: "2.5cm"  # Optional: photo size (default: 2.5cm). Examples: "3cm", "2in", "80pt"
 
 # Professional Summary
 summary: |

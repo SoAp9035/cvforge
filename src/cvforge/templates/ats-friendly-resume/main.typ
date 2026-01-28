@@ -79,6 +79,7 @@
   author-position: left,
   role: get("role", default: ""),
   photo: if has("photo") { data.photo } else { none },
+  photo-width: eval(get("photo-width", default: "2.5cm")),
   location: get("location", default: ""),
   email: get("email", default: ""),
   phone: get("phone", default: ""),
