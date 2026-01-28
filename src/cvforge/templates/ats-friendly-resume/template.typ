@@ -117,8 +117,8 @@
       ],
     )
   } else {
-    // No photo: display header aligned to author-position
-    align(author-position)[
+    // No photo: display header centered for a balanced look
+    align(center)[
       #text(weight: "bold", size: author-font-size, fill: if color-enabled { rgb(text-color) } else { black })[#author]
       #if role != "" [
         #v(0.2em)
