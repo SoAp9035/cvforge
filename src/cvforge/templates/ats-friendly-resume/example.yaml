@@ -11,14 +11,27 @@ email: "your.email@example.com"
 phone: "+1 555 123 4567"
 location: "City, Country"
 website: "yourwebsite.com"
+# website-text: "Portfolio" # Optional: Custom display text (default: "Website")
 linkedin: "linkedin.com/in/yourprofile"
+# linkedin-text: "LinkedIn Profile" # Optional: Custom display text (default: "LinkedIn")
 github: "github.com/yourusername"
+# github-text: "GitHub Profile" # Optional: Custom display text (default: "GitHub")
 # photo: "photo.png"  # Optional: uncomment and add path to your photo
+# photo-width: "2.5cm"  # Optional: photo size (default: 2.5cm). Examples: "3cm", "2in", "80pt"
 
 # Professional Summary
 summary: |
   A brief professional summary describing your experience, expertise, and career goals.
   Keep it concise and impactful, typically 2-3 sentences.
+
+# Technical Skills (grouped by category)
+skills:
+  - Category: "Programming Languages"
+    Items: ["Python", "JavaScript", "TypeScript", "Go"]
+  - Category: "Frameworks & Libraries"
+    Items: ["React", "Node.js", "Django", "FastAPI"]
+  - Category: "Tools & Platforms"
+    Items: ["Docker", "Kubernetes", "AWS", "Git"]
 
 # Work Experience
 experience:
@@ -38,38 +51,24 @@ experience:
       - "Key achievement in this role"
       - "Notable project or contribution"
 
+# Projects (optional)
+projects:
+  - name: "Project Name"
+    date: "2023"
+    url: "github.com/username/project"  # Optional
+    # url-text: "View Code" # Optional: Custom display text (default: shows raw URL)
+    role: "Lead Developer"  # Optional
+    description:
+      - "Brief description of the project and your contribution"
+      - "Technologies used and impact achieved"
+
 # Education
 education:
   - school: "University Name"
     degree: "Degree Type in Field of Study"
     date: "2016 - 2020"
     location: "City, Country"  # Optional
-
-# Technical Skills (grouped by category)
-skills:
-  - Category: "Programming Languages"
-    Items: ["Python", "JavaScript", "TypeScript", "Go"]
-  - Category: "Frameworks & Libraries"
-    Items: ["React", "Node.js", "Django", "FastAPI"]
-  - Category: "Tools & Platforms"
-    Items: ["Docker", "Kubernetes", "AWS", "Git"]
-
-# Projects (optional)
-projects:
-  - name: "Project Name"
-    date: "2023"
-    url: "github.com/username/project"  # Optional
-    role: "Lead Developer"  # Optional
-    description:
-      - "Brief description of the project and your contribution"
-      - "Technologies used and impact achieved"
-
-# Languages (optional)
-languages:
-  - name: "English"
-    level: "Native"
-  - name: "Spanish"
-    level: "Professional"
+    gpa: "3.8/4.0"  # Optional
 
 # Certifications (optional)
 certifications:
@@ -82,6 +81,13 @@ awards:
   - name: "Employee of the Year"
     issuer: "Company Name"
     date: "2022"
+
+# Languages (optional)
+languages:
+  - name: "English"
+    level: "Native"
+  - name: "Spanish"
+    level: "Professional"
 
 # Interests (optional)
 interests: ["Open Source", "Machine Learning", "Photography"]

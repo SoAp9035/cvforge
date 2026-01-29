@@ -167,7 +167,7 @@ def build_cv(input_file: Path) -> int:
     
     if not check_typst_installed():
         print("Error: Typst is not installed or not in PATH.", file=sys.stderr)
-        print("Install Typst from: https://typst.app/", file=sys.stderr)
+        print("Install Typst from: https://github.com/typst/typst", file=sys.stderr)
         return 1
     
     input_abs = input_file.resolve()
@@ -207,6 +207,31 @@ def build_cv(input_file: Path) -> int:
             if photo_path != photo_in_template_dir.resolve():
                 shutil.copy2(photo_path, photo_in_template_dir)
                 temp_photo_copy = True
+            if yaml_in_template_dir.exists():
+                try:
+                    if YAML_AVAILABLE:
+                        with open(yaml_in_template_dir, 'r', encoding='utf-8') as f:
+                            yaml_data = yaml.safe_load(f) or {}
+                        yaml_data["photo"] = photo_in_template_dir.name
+                        with open(yaml_in_template_dir, 'w', encoding='utf-8') as f:
+                            yaml.safe_dump(yaml_data, f, sort_keys=False, allow_unicode=True)
+                    else:
+                        with open(yaml_in_template_dir, 'r', encoding='utf-8') as f:
+                            lines = f.readlines()
+                        updated = False
+                        for i, line in enumerate(lines):
+                            stripped = line.lstrip()
+                            if stripped.startswith("photo:"):
+                                indent = line[: len(line) - len(stripped)]
+                                lines[i] = f"{indent}photo: \"{photo_in_template_dir.name}\"\n"
+                                updated = True
+                                break
+                        if not updated:
+                            lines.append(f"photo: \"{photo_in_template_dir.name}\"\n")
+                        with open(yaml_in_template_dir, 'w', encoding='utf-8') as f:
+                            f.writelines(lines)
+                except Exception:
+                    pass
         else:
             print(f"Warning: Photo file '{photo_path_str}' not found.", file=sys.stderr)
     
@@ -263,6 +288,13 @@ def init_template(output_dir: Path) -> int:
     if not example_yaml.exists():
         print("Error: Example template not found.", file=sys.stderr)
         return 1
+
+    output_dir = output_dir.resolve()
+    if output_dir.exists() and not output_dir.is_dir():
+        print(f"Error: {output_dir} is not a directory.", file=sys.stderr)
+        return 1
+
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     output_file = output_dir / "cv.yaml"
     
