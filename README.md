@@ -1,6 +1,6 @@
 # CVForge
 
-A YAML-based, ATS-compatible CV/Resume generator powered by [Typst](https://typst.app/).
+A YAML-based, ATS-compatible CV/Resume generator powered by [Typst](https://github.com/typst/typst).
 
 ---
 
@@ -13,8 +13,6 @@ I created CVForge because I needed a fast, reliable way to build and rebuild my 
 - Spending time on formatting instead of content
 
 CVForge lets you define your CV once in YAML and regenerate it instantly. Change a job title, add a skill, rebuild — done. **100% local, 100% private.**
-
-> **Note:** I'm planning to re-build this tool from scratch with no vibe coding.
 
 ---
 
@@ -87,49 +85,41 @@ language: "tr"  # Turkish headings
 Run `cvforge fonts` to see available options. The font must be installed on your system.
 
 ```yaml
-font: "roboto"  # Options: noto, roboto, inter, lato, montserrat, opensans, etc.
+font: "roboto"  # Options: noto, roboto, inter, lato, arial, times, calibri, etc.
 ```
 
 ---
 
 ## YAML Structure
 
-```yaml
-language: "en"
-font: "noto"
+| Field | Required | Description |
+|-------|----------|-------------|
+| `language` | No | Section heading language: `"en"` (default) or `"tr"` |
+| `font` | No | Font family (run `cvforge fonts` to list options) |
+| `name` | Yes | Your full name |
+| `role` | Yes | Job title / professional role |
+| `email` | Yes | Contact email |
+| `phone` | No | Phone number |
+| `location` | No | City, Country |
+| `website` | No | Personal website URL |
+| `website-text` | No | Custom display text for website link |
+| `linkedin` | No | LinkedIn profile URL |
+| `linkedin-text` | No | Custom display text for LinkedIn link |
+| `github` | No | GitHub profile URL |
+| `github-text` | No | Custom display text for GitHub link |
+| `photo` | No | Path to profile photo |
+| `photo-width` | No | Photo width (default: `"2.5cm"`) |
+| `summary` | No | Professional summary paragraph |
+| `skills` | No | List of skill categories with items |
+| `experience` | No | Work experience entries |
+| `education` | No | Education entries |
+| `projects` | No | Project entries |
+| `certifications` | No | Certification entries |
+| `awards` | No | Award entries |
+| `languages` | No | Language proficiencies |
+| `interests` | No | List of interests/hobbies |
 
-name: "Your Name"
-role: "Software Engineer"
-email: "hello@example.com"
-phone: "+1 555 123 4567"
-location: "New York, USA"
-website: "example.com"
-linkedin: "linkedin.com/in/username"
-github: "github.com/username"
-photo: "photo.jpg"
-
-summary: |
-  A brief professional summary...
-
-experience:
-  - company: "Tech Corp"
-    role: "Senior Developer"
-    date: "2022 - Present"
-    description:
-      - "Led a team of 5 developers"
-      - "Reduced latency by 40%"
-
-education:
-  - school: "University of Science"
-    degree: "B.S. Computer Science"
-    date: "2018 - 2022"
-
-skills:
-  - Category: "Languages"
-    Items: ["Python", "Rust", "TypeScript"]
-
-# Additional: projects, languages, certifications, awards, interests
-```
+> Run `cvforge init` to generate a complete example YAML file with all fields.
 
 ---
 
@@ -138,13 +128,23 @@ skills:
 - **Cross-platform**: Linux, Windows, macOS
 - **ATS Compatible**: Clean, parseable text
 - **Multi-language**: EN/TR section headings
-- **11 fonts** available
+- **17 fonts** available
 - **Built-in ATS checker**
 - **Photo support**
 - **100% Local & Private**
 
 ---
 
+## Support
+
+If you find this project useful, consider supporting its development:
+
+<a href="https://www.buymeacoffee.com/soap9035" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="40"></a>
+
+---
+
 ## License
 
-MIT
+This project is licensed under the [MIT License](LICENSE).
+
+© 2025 Ahmet Burhan Kayalı
