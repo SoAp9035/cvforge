@@ -1,6 +1,6 @@
 [project]
 name = "cvforge"
-version = "1.1.0"
+version = "1.1.1b1"
 description = "ATS-friendly CV/Resume builder using YAML and Typst"
 readme = "README.md"
 authors = [
