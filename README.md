@@ -18,8 +18,8 @@ CVForge lets you define your CV once in YAML and regenerate it instantly. Change
 
 ## Requirements
 
-- **[Typst](https://github.com/typst/typst)**: Must be installed and available in your `PATH`
-- **Python 3.8+**
+- **[Typst](https://github.com/typst/typst?tab=readme-ov-file#installation)**: Must be installed and available in your `PATH`
+- **Python 3.10+**
 
 ---
 

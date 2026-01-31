@@ -229,7 +229,7 @@
   block(spacing: 0.65em)[
     #if tech-used == "" [
       #one-by-one-layout(
-        left: [*#name* #if url != "" and url != none and dates != "" [(#link(normalize-url(url))[#display-text])]],
+        left: [*#name* #if url != "" and url != none [(#link(normalize-url(url))[#display-text])]],
         right: dates,
       )
     ] else [
