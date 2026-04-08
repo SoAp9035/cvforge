@@ -27,6 +27,7 @@ keywords = ["cv", "resume", "typst", "ats", "pdf"]
 dependencies = [
     "pyyaml>=6.0",
     "pypdf>=4.0",
+    "typst>=0.12",
 ]
 
 [project.urls]
