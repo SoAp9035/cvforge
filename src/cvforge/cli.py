@@ -5,9 +5,10 @@ CVForge CLI - Build ATS-friendly CVs from YAML using Typst.
 
 import argparse
 import shutil
-import subprocess
 import sys
 from pathlib import Path
+
+import typst
 
 try:
     import yaml
@@ -76,20 +77,6 @@ def get_templates_dir() -> Path:
 def get_template_dir(template_name: str = DEFAULT_TEMPLATE) -> Path:
     """Get the path to a specific template directory."""
     return get_templates_dir() / template_name
-
-
-def check_typst_installed() -> bool:
-    """Check if Typst is installed and available in PATH."""
-    try:
-        result = subprocess.run(
-            ["typst", "--version"],
-            capture_output=True,
-            text=True
-        )
-        return result.returncode == 0
-    except FileNotFoundError:
-        return False
-
 
 def validate_yaml(yaml_path: Path) -> dict:
     """Load and validate YAML file, returning data dict."""
@@ -165,11 +152,6 @@ def build_cv(input_file: Path) -> int:
         print(f"Error: Typst template '{typst_file}' not found.", file=sys.stderr)
         return 1
     
-    if not check_typst_installed():
-        print("Error: Typst is not installed or not in PATH.", file=sys.stderr)
-        print("Install Typst from: https://github.com/typst/typst", file=sys.stderr)
-        return 1
-    
     input_abs = input_file.resolve()
     input_dir = input_abs.parent
     yaml_in_template_dir = template_dir / input_file.name
@@ -238,27 +220,17 @@ def build_cv(input_file: Path) -> int:
     print(f"Building CV: {input_file} -> {output_file}")
     
     try:
-        result = subprocess.run(
-            [
-                "typst", "compile",
-                "--input", f"cv_data={input_file.name}",
-                str(typst_file),
-                str(output_file)
-            ],
-            capture_output=True,
-            text=True,
-            cwd=str(template_dir)
+        typst.compile(
+            input=str(typst_file),
+            output=str(output_file),
+            root=str(template_dir),
+            sys_inputs={"cv_data": input_file.name},
         )
         
         if temp_copy and yaml_in_template_dir.exists():
             yaml_in_template_dir.unlink()
         if temp_photo_copy and photo_in_template_dir and photo_in_template_dir.exists():
             photo_in_template_dir.unlink()
-        
-        if result.returncode != 0:
-            print("Error: Typst compilation failed:", file=sys.stderr)
-            print(result.stderr, file=sys.stderr)
-            return 1
         
         print(f"✓ CV generated successfully: {output_file}")
         return 0
@@ -268,7 +240,8 @@ def build_cv(input_file: Path) -> int:
             yaml_in_template_dir.unlink()
         if temp_photo_copy and photo_in_template_dir and photo_in_template_dir.exists():
             photo_in_template_dir.unlink()
-        print(f"Error: {e}", file=sys.stderr)
+        print(f"Error: Typst compilation failed:", file=sys.stderr)
+        print(f"  {e}", file=sys.stderr)
         return 1
 
 
