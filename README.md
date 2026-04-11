@@ -1,6 +1,6 @@
 # CVForge
 
-A YAML-based, ATS-compatible CV/Resume generator powered by [Typst](https://github.com/typst/typst).
+A YAML-based, ATS-compatible CV/Resume generator.
 
 ---
 
