@@ -1,6 +1,8 @@
 # CVForge
 
-A YAML-based, ATS-compatible CV/Resume generator.
+[![PyPI version](https://badge.fury.io/py/cvforge.svg)](https://badge.fury.io/py/cvforge) [![Downloads](https://pepy.tech/badge/cvforge)](https://pepy.tech/project/cvforge) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+CVForge is a CLI that turns a YAML file into a clean, ATS-friendly PDF resume using Typst. Edit your content, rerun the command, and regenerate the same layout locally. Ideal for fast iteration and version control.
 
 ---
 
@@ -16,24 +18,13 @@ CVForge lets you define your CV once in YAML and regenerate it instantly. Change
 
 ---
 
-## Requirements
-
-- **Python 3.10+**
-
----
-
 ## Installation
 
-### Using UV (Recommended)
+### Using [UV](https://docs.astral.sh/uv/) (Recommended)
 
 ```bash
-# Run without installing
-uvx cvforge init
-uvx cvforge cv.yaml
-
-# Or install as a tool
+# Install as a tool
 uv tool install cvforge
-cvforge cv.yaml
 
 # Update
 uv tool upgrade cvforge
@@ -51,13 +42,21 @@ pip install cvforge
 # Update
 pip install --upgrade cvforge
 
-# Use
-cvforge cv.yaml
+# Uninstall
+pip uninstall cvforge
 ```
 
 ---
 
 ## Usage
+
+```bash
+# Initialize a new CV
+cvforge init
+
+# Generate PDF from YAML
+cvforge cv.yaml
+```
 
 | Command | Description |
 |---------|-------------|
