@@ -328,8 +328,8 @@ def main():
     
     parser = argparse.ArgumentParser(
         prog="cvforge",
-        description="Build ATS-friendly CV/Resume from YAML file using Typst.",
-        epilog="Examples:\n  cvforge cv.yaml\n  cvforge build resume.yaml\n  cvforge init\n  cvforge fonts\n  cvforge ats-check cv.pdf",
+        description="Build clean, ATS-friendly PDF resumes from YAML with Typst.",
+        epilog="Examples:\n  cvforge init\n  cvforge cv.yaml\n  cvforge build resume.yaml\n  cvforge fonts\n  cvforge ats-check cv.pdf",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
