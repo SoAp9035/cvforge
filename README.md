@@ -119,6 +119,16 @@ font: "roboto"  # Options: noto, roboto, inter, lato, arial, times, calibri, etc
 
 > Run `cvforge init` to generate a complete example YAML file with all fields.
 
+### Inline Bold Formatting
+
+Use double underscores to make text bold in narrative fields:
+
+```yaml
+summary: "Built and scaled __high-throughput APIs__ for fintech workloads."
+```
+
+`__text__` renders as bold in fields like summary, skills, descriptions, languages, certifications, awards, and interests. Unmatched double underscores stay literal.
+
 ---
 
 ## Features
