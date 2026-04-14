@@ -101,11 +101,11 @@
 #for (key, val) in data.pairs() {
   if key == "summary" and has-text(val) [
     == #t("summary")
-    #val
+    #render-inline-bold(val)
   ] else if key == "skills" and has-list(val) [
     == #t("skills")
     #for skill in val [
-      - *#skill.Category*: #skill.Items.join(", ")
+      - *#render-inline-bold(skill.Category)*: #render-inline-bold(skill.Items.join(", "))
     ]
   ] else if key == "experience" and has-list(val) [
     == #t("experience")
@@ -118,7 +118,7 @@
       )
       #if "description" in job [
         #for bullet in job.description [
-          - #bullet
+          - #render-inline-bold(bullet)
         ]
       ]
     ]
@@ -134,7 +134,7 @@
       )
       #if "description" in entry [
         #for bullet in entry.description [
-          - #bullet
+          - #render-inline-bold(bullet)
         ]
       ]
     ]
@@ -148,31 +148,31 @@
         url-text: proj.at("url-text", default: ""),
       )
       #if "role" in proj [
-        #text(style: "italic")[#proj.role]
+        #text(style: "italic")[#render-inline-bold(proj.role)]
       ]
       #if "description" in proj [
         #for bullet in proj.description [
-          - #bullet
+          - #render-inline-bold(bullet)
         ]
       ]
     ]
   ] else if key == "languages" and has-list(val) [
     == #t("languages")
     #for lang_item in val [
-      - *#lang_item.at("name", default: "")*: #lang_item.at("level", default: "")
+      - *#render-inline-bold(lang_item.at("name", default: ""))*: #render-inline-bold(lang_item.at("level", default: ""))
     ]
   ] else if key == "certifications" and has-list(val) [
     == #t("certifications")
     #for cert in val [
-      - *#cert.at("name", default: "")* #if "issuer" in cert [(#cert.issuer)] #if "date" in cert [- #cert.date]
+      - *#render-inline-bold(cert.at("name", default: ""))* #if "issuer" in cert [(#render-inline-bold(cert.issuer))] #if "date" in cert [- #render-inline-bold(cert.date)]
     ]
   ] else if key == "awards" and has-list(val) [
     == #t("awards")
     #for award in val [
-      - *#award.at("name", default: "")* #if "issuer" in award [(#award.issuer)] #if "date" in award [- #award.date]
+      - *#render-inline-bold(award.at("name", default: ""))* #if "issuer" in award [(#render-inline-bold(award.issuer))] #if "date" in award [- #render-inline-bold(award.date)]
     ]
   ] else if key == "interests" and has-list(val) [
     == #t("interests")
-    #val.join(" • ")
+    #render-inline-bold(val.join(" • "))
   ]
 }
