@@ -11,6 +11,30 @@
   }
 }
 
+// Render paired __text__ segments as bold content and keep unmatched delimiters literal.
+#let render-inline-bold(text) = {
+  if text == none or text == "" or not text.contains("__") {
+    text
+  } else {
+    let parts = text.split("__")
+    let has-unmatched-tail = calc.rem(parts.len(), 2) == 0
+    let render-count = if has-unmatched-tail { parts.len() - 1 } else { parts.len() }
+
+    let chunks = ()
+    for (index, part) in parts.enumerate() {
+      if index >= render-count {
+        chunks.push("__" + part)
+      } else if calc.rem(index, 2) == 1 {
+        chunks.push(strong(part))
+      } else {
+        chunks.push(part)
+      }
+    }
+
+    chunks.join("")
+  }
+}
+
 #let resume(
   // Name of the author (you)
   author: "",
@@ -198,17 +222,17 @@
   block(spacing: 0.65em)[
     #if tech-used == "" [
       #two-by-two-layout(
-        top-left: strong(company),
-        top-right: dates,
-        bottom-left: role,
-        bottom-right: emph(location),
+        top-left: strong(render-inline-bold(company)),
+        top-right: render-inline-bold(dates),
+        bottom-left: render-inline-bold(role),
+        bottom-right: emph(render-inline-bold(location)),
       )
     ] else [
       #two-by-two-layout(
-        top-left: strong(company) + " " + "|" + " " + strong(role),
-        top-right: dates,
-        bottom-left: tech-used,
-        bottom-right: emph(location),
+        top-left: strong(render-inline-bold(company)) + " " + "|" + " " + strong(render-inline-bold(role)),
+        top-right: render-inline-bold(dates),
+        bottom-left: render-inline-bold(tech-used),
+        bottom-right: emph(render-inline-bold(location)),
       )
     ]
   ]
@@ -229,14 +253,14 @@
   block(spacing: 0.65em)[
     #if tech-used == "" [
       #one-by-one-layout(
-        left: [*#name* #if url != "" and url != none [(#link(normalize-url(url))[#display-text])]],
-        right: dates,
+        left: [*#render-inline-bold(name)* #if url != "" and url != none [(#link(normalize-url(url))[#display-text])]],
+        right: render-inline-bold(dates),
       )
     ] else [
       #two-by-two-layout(
-        top-left: strong(name),
-        top-right: dates,
-        bottom-left: tech-used,
+        top-left: strong(render-inline-bold(name)),
+        top-right: render-inline-bold(dates),
+        bottom-left: render-inline-bold(tech-used),
         bottom-right: if url != "" and url != none [(#link(normalize-url(url))[#display-text])] else [],
       )
     ]
@@ -255,10 +279,10 @@
 ) = {
   block(spacing: 0.65em)[
     #two-by-two-layout(
-      top-left: strong(institution),
-      top-right: location,
-      bottom-left: if gpa != "" { degree + " | GPA: " + gpa } else { degree },
-      bottom-right: dates,
+      top-left: strong(render-inline-bold(institution)),
+      top-right: render-inline-bold(location),
+      bottom-left: render-inline-bold(if gpa != "" { degree + " | GPA: " + gpa } else { degree }),
+      bottom-right: render-inline-bold(dates),
     )
   ]
 }

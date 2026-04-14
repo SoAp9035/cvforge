@@ -1,6 +1,7 @@
 # CVForge Configuration
 # Language: "en" (English) or "tr" (Turkish) - affects section headings
 # Font options: "noto", "roboto", "liberation", "dejavu", "inter", "lato", "montserrat", "raleway", "ubuntu", "opensans", "sourcesans", "arial", "times", "calibri", "georgia", "garamond", "trebuchet"
+# Bold inline text in narrative fields using double underscores (e.g. __text__)
 language: "en"
 font: "noto"
 
@@ -21,7 +22,7 @@ github: "github.com/yourusername"
 
 # Professional Summary
 summary: |
-  A brief professional summary describing your experience, expertise, and career goals.
+  A brief professional summary describing your __experience__, expertise, and career goals.
   Keep it concise and impactful, typically 2-3 sentences.
 
 # Technical Skills (grouped by category)
@@ -40,7 +41,7 @@ experience:
     date: "2022 - Present"
     location: "City, Country"  # Optional
     description:
-      - "Achievement or responsibility with measurable impact"
+      - "Achievement or responsibility with __measurable impact__"
       - "Another key accomplishment or project"
       - "Technical skills applied or leadership demonstrated"
 

@@ -1,6 +1,8 @@
 # CVForge
 
-A YAML-based, ATS-compatible CV/Resume generator powered by [Typst](https://github.com/typst/typst).
+[![PyPI version](https://badge.fury.io/py/cvforge.svg)](https://badge.fury.io/py/cvforge) [![Downloads](https://pepy.tech/badge/cvforge)](https://pepy.tech/project/cvforge) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+CVForge is a CLI that turns a YAML file into a clean, ATS-friendly PDF resume using Typst. Edit your content, rerun the command, and regenerate the same layout locally. Ideal for fast iteration and version control.
 
 ---
 
@@ -16,25 +18,13 @@ CVForge lets you define your CV once in YAML and regenerate it instantly. Change
 
 ---
 
-## Requirements
-
-- **[Typst](https://github.com/typst/typst?tab=readme-ov-file#installation)**: Must be installed and available in your `PATH`
-- **Python 3.10+**
-
----
-
 ## Installation
 
-### Using UV (Recommended)
+### Using [UV](https://docs.astral.sh/uv/) (Recommended)
 
 ```bash
-# Run without installing
-uvx cvforge init
-uvx cvforge cv.yaml
-
-# Or install as a tool
+# Install as a tool
 uv tool install cvforge
-cvforge cv.yaml
 
 # Update
 uv tool upgrade cvforge
@@ -52,86 +42,79 @@ pip install cvforge
 # Update
 pip install --upgrade cvforge
 
-# Use
-cvforge cv.yaml
+# Uninstall
+pip uninstall cvforge
 ```
 
 ---
 
 ## Usage
 
-| Command | Description |
-|---------|-------------|
-| `cvforge init` | Creates a template `cv.yaml` |
-| `cvforge <file.yaml>` | Generates PDF from YAML |
-| `cvforge fonts` | Lists available fonts |
-| `cvforge ats-check <file.pdf>` | Checks PDF for ATS compatibility |
+```bash
+# Initialize a complete template cv.yaml
+cvforge init
 
----
+# Generate PDF from your YAML file
+cvforge cv.yaml
 
-## Configuration
+# List all available fonts
+cvforge fonts
 
-### Language
-
-The `language` parameter controls the **section headings** in your CV (e.g., "Experience" vs "Deneyim"). It does not translate your content.
-
-```yaml
-language: "en"  # English headings (default)
-language: "tr"  # Turkish headings
-```
-
-### Fonts
-
-Run `cvforge fonts` to see available options. The font must be installed on your system.
-
-```yaml
-font: "roboto"  # Options: noto, roboto, inter, lato, arial, times, calibri, etc.
+# Verify ATS compatibility of generated PDF
+cvforge ats-check <file.pdf>
 ```
 
 ---
 
-## YAML Structure
+## Configuration & YAML Structure
+
+Run `cvforge init` to generate a complete example `cv.yaml` file with all fields. Below is the full reference:
 
 | Field | Required | Description |
-|-------|----------|-------------|
-| `language` | No | Section heading language: `"en"` (default) or `"tr"` |
-| `font` | No | Font family (run `cvforge fonts` to list options) |
-| `name` | Yes | Your full name |
-| `role` | Yes | Job title / professional role |
-| `email` | Yes | Contact email |
+|-------|:--------:|-------------|
+| `language` | No | Section headings language: `"en"` (default) or `"tr"`. Does not translate content. |
+| `font` | No | Font family (run `cvforge fonts` to see available options). |
+| `name` | **Yes**| Your full name |
+| `role` | **Yes**| Job title / professional role |
+| `email` | **Yes**| Contact email |
 | `phone` | No | Phone number |
 | `location` | No | City, Country |
 | `website` | No | Personal website URL |
-| `website-text` | No | Custom display text for website link |
+| `website-text` | No | Custom display text for the website link |
 | `linkedin` | No | LinkedIn profile URL |
-| `linkedin-text` | No | Custom display text for LinkedIn link |
+| `linkedin-text`| No | Custom display text for the LinkedIn link |
 | `github` | No | GitHub profile URL |
-| `github-text` | No | Custom display text for GitHub link |
-| `photo` | No | Path to profile photo |
-| `photo-width` | No | Photo width (default: `"2.5cm"`) |
+| `github-text` | No | Custom display text for the GitHub link |
+| `photo` | No | Local path to your profile photo |
+| `photo-width` | No | Photo display width (default: `"2.5cm"`) |
 | `summary` | No | Professional summary paragraph |
 | `skills` | No | List of skill categories with items |
 | `experience` | No | Work experience entries |
 | `education` | No | Education entries |
 | `projects` | No | Project entries |
-| `certifications` | No | Certification entries |
+| `certifications`| No | Certification entries |
 | `awards` | No | Award entries |
 | `languages` | No | Language proficiencies |
 | `interests` | No | List of interests/hobbies |
 
-> Run `cvforge init` to generate a complete example YAML file with all fields.
+### Inline Bold Formatting
+
+Use double underscores to make text bold in narrative fields (summary, descriptions, skills, etc.):
+
+```yaml
+summary: "Built and scaled __high-throughput APIs__ for fintech workloads."
+```
 
 ---
 
 ## Features
 
 - **Cross-platform**: Linux, Windows, macOS
-- **ATS Compatible**: Clean, parseable text
-- **Multi-language**: EN/TR section headings
-- **17 fonts** available
-- **Built-in ATS checker**
-- **Photo support**
-- **100% Local & Private**
+- **ATS Compatible**: Clean, parseable text + built-in checker (`cvforge ats-check`)
+- **Multi-language Headers**: Support for EN/TR out of the box
+- **Typography Choices**: 17 available fonts (`cvforge fonts`)
+- **Rich Formatting**: Inline bolding via `__text__`, profile photo support
+- **100% Local & Private**: No cloud storage, no online rendering
 
 ---
 
@@ -146,5 +129,3 @@ If you find this project useful, consider supporting its development:
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
-© 2025 Ahmet Burhan Kayalı

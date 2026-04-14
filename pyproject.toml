@@ -1,12 +1,12 @@
 [project]
 name = "cvforge"
-version = "1.1.1"
-description = "ATS-friendly CV/Resume builder using YAML and Typst"
+dynamic = ["version"]
+description = "Build clean, ATS-friendly PDF resumes from YAML with Typst."
 readme = "README.md"
 authors = [
     {name = "Ahmet Burhan Kayalı", email = "ahmetburhan1703@gmail.com"}
 ]
-license = {text = "MIT"}
+license = {file = "LICENSE"}
 requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -27,12 +27,15 @@ keywords = ["cv", "resume", "typst", "ats", "pdf"]
 dependencies = [
     "pyyaml>=6.0",
     "pypdf>=4.0",
+    "typst>=0.12",
 ]
 
 [project.urls]
 Homepage = "https://github.com/SoAp9035/cvforge"
 Repository = "https://github.com/SoAp9035/cvforge"
 Issues = "https://github.com/SoAp9035/cvforge/issues"
+Documentation = "https://github.com/SoAp9035/cvforge#readme"
+Changelog = "https://github.com/SoAp9035/cvforge/releases"
 
 [project.scripts]
 cvforge = "cvforge.cli:main"
@@ -40,6 +43,9 @@ cvforge = "cvforge.cli:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/cvforge/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cvforge"]
