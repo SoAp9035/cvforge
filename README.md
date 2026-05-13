@@ -118,6 +118,12 @@ summary: "Built and scaled __high-throughput APIs__ for fintech workloads."
 
 ---
 
+## Agent Skill
+
+Use the [CVForge agent skill](https://github.com/SoAp9035/cvforge-skill) to help coding agents create, edit, build, and validate CVForge resumes.
+
+---
+
 ## Support
 
 If you find this project useful, consider supporting its development:
