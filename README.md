@@ -68,7 +68,28 @@ cvforge ats-check <file.pdf>
 
 ## Configuration & YAML Structure
 
-Run `cvforge init` to generate a complete example `cv.yaml` file with all fields. Below is the full reference:
+Run `cvforge init` to generate a complete example `cv.yaml` file with all
+fields and compact comments.
+
+### Writing `cv.yaml`
+
+- Keep `name`, `role`, and `email` present and non-empty.
+- Keep top-level sections in the order you want them rendered. CVForge renders
+  resume sections in YAML order.
+- Use the documented field names and list shapes. Unsupported top-level
+  sections are ignored unless you also customize the Typst template.
+- Use `__text__` for inline bold emphasis in summaries, bullets, skills, and
+  similar narrative fields.
+- Keep facts accurate. Do not add employers, dates, credentials, tools, or
+  metrics unless they are real and supplied.
+- Use compact, achievement-focused bullets. One or two pages is usually best
+  for ATS parsing.
+- For photos, set `photo` to a local path relative to the YAML file. Use simple
+  `photo-width` values such as `"2.5cm"`, `"3cm"`, `"2in"`, or `"80pt"`.
+- After editing, build with `cvforge cv.yaml` and check the PDF with
+  `cvforge ats-check cv.pdf`.
+
+Below is the full reference:
 
 | Field | Required | Description |
 |-------|:--------:|-------------|
@@ -85,17 +106,17 @@ Run `cvforge init` to generate a complete example `cv.yaml` file with all fields
 | `linkedin-text`| No | Custom display text for the LinkedIn link |
 | `github` | No | GitHub profile URL |
 | `github-text` | No | Custom display text for the GitHub link |
-| `photo` | No | Local path to your profile photo |
-| `photo-width` | No | Photo display width (default: `"2.5cm"`) |
+| `photo` | No | Local path to your profile photo, resolved relative to the YAML file |
+| `photo-width` | No | Photo display width (default: `"2.5cm"`; examples: `"3cm"`, `"2in"`, `"80pt"`) |
 | `summary` | No | Professional summary paragraph |
-| `skills` | No | List of skill categories with items |
-| `experience` | No | Work experience entries |
-| `education` | No | Education entries |
-| `projects` | No | Project entries |
-| `certifications`| No | Certification entries |
-| `awards` | No | Award entries |
-| `languages` | No | Language proficiencies |
-| `interests` | No | List of interests/hobbies |
+| `skills` | No | List of skill categories with `Category` and `Items` |
+| `experience` | No | List of work entries with optional `description` bullet lists |
+| `education` | No | List of education entries with optional `description` bullet lists |
+| `projects` | No | List of project entries with optional `description` bullet lists |
+| `certifications`| No | List of certification entries |
+| `awards` | No | List of award entries |
+| `languages` | No | List of language proficiency entries |
+| `interests` | No | List of interest/hobby strings |
 
 ### Inline Bold Formatting
 
