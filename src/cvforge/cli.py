@@ -78,6 +78,8 @@ LIST_OF_MAP_SECTIONS = (
     "awards",
 )
 
+REQUIRED_IDENTITY_FIELDS = ("name", "role", "email")
+
 OPTIONAL_EMPTY_VALUES = (None, "")
 
 
@@ -119,7 +121,19 @@ def validate_list_of_maps(data: dict, section: str) -> None:
             )
 
 
+def validate_required_identity_fields(data: dict) -> None:
+    for field in REQUIRED_IDENTITY_FIELDS:
+        if field not in data:
+            fail_yaml_validation(f"missing required field '{field}'.")
+
+        value = data[field]
+        if not isinstance(value, str) or not value.strip():
+            fail_yaml_validation(f"'{field}' must be non-empty text.")
+
+
 def validate_yaml_shape(data: dict) -> None:
+    validate_required_identity_fields(data)
+
     if "summary" in data and not is_optional_empty(data["summary"]):
         if not isinstance(data["summary"], str):
             fail_yaml_validation(
