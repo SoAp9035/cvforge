@@ -1,11 +1,15 @@
 # CVForge Configuration
-# Language: "en" (English) or "tr" (Turkish) - affects section headings
+# Build: cvforge cv.yaml
+# Check: cvforge ats-check cv.pdf
+# CVForge renders sections in YAML order. Recommended order is below, but you can customize as needed.
+# Required fields: name, role, email.
+# Inline bold works in narrative text with double underscores, for example: __text__
+# Language affects section headings only: "en" or "tr".
 # Font options: "noto", "roboto", "liberation", "dejavu", "inter", "lato", "montserrat", "raleway", "ubuntu", "opensans", "sourcesans", "arial", "times", "calibri", "georgia", "garamond", "trebuchet"
-# Bold inline text in narrative fields using double underscores (e.g. __text__)
 language: "en"
 font: "noto"
 
-# Personal Information
+# Personal Information (name, role, and email must be non-empty text)
 name: "Your Name"
 role: "Your Title / Role"
 email: "your.email@example.com"
@@ -17,15 +21,15 @@ linkedin: "linkedin.com/in/yourprofile"
 # linkedin-text: "LinkedIn Profile" # Optional: Custom display text (default: "LinkedIn")
 github: "github.com/yourusername"
 # github-text: "GitHub Profile" # Optional: Custom display text (default: "GitHub")
-# photo: "photo.png"  # Optional: uncomment and add path to your photo
-# photo-width: "2.5cm"  # Optional: photo size (default: 2.5cm). Examples: "3cm", "2in", "80pt"
+# photo: "photo.png"  # Optional: path is resolved relative to this YAML file
+# photo-width: "2.5cm"  # Optional: safe examples: "3cm", "2in", "80pt"
 
 # Professional Summary
 summary: |
   A brief professional summary describing your __experience__, expertise, and career goals.
   Keep it concise and impactful, typically 2-3 sentences.
 
-# Technical Skills (grouped by category)
+# Technical Skills (must be a list of groups with Category and Items)
 skills:
   - Category: "Programming Languages"
     Items: ["Python", "JavaScript", "TypeScript", "Go"]
@@ -34,7 +38,7 @@ skills:
   - Category: "Tools & Platforms"
     Items: ["Docker", "Kubernetes", "AWS", "Git"]
 
-# Work Experience
+# Work Experience (description must be a list of bullet strings)
 experience:
   - company: "Company Name"
     role: "Job Title"
@@ -52,7 +56,7 @@ experience:
       - "Key achievement in this role"
       - "Notable project or contribution"
 
-# Projects (optional)
+# Projects (optional; description must be a list of bullet strings)
 projects:
   - name: "Project Name"
     date: "2023"
@@ -63,7 +67,7 @@ projects:
       - "Brief description of the project and your contribution"
       - "Technologies used and impact achieved"
 
-# Education
+# Education (description bullets are optional)
 education:
   - school: "University Name"
     degree: "Degree Type in Field of Study"
@@ -71,24 +75,24 @@ education:
     location: "City, Country"  # Optional
     gpa: "3.8/4.0"  # Optional
 
-# Certifications (optional)
+# Certifications (optional list)
 certifications:
   - name: "AWS Solutions Architect"
     issuer: "Amazon Web Services"
     date: "2023"
 
-# Awards (optional)
+# Awards (optional list)
 awards:
   - name: "Employee of the Year"
     issuer: "Company Name"
     date: "2022"
 
-# Languages (optional)
+# Languages (optional list)
 languages:
   - name: "English"
     level: "Native"
   - name: "Spanish"
     level: "Professional"
 
-# Interests (optional)
+# Interests (optional list of strings)
 interests: ["Open Source", "Machine Learning", "Photography"]

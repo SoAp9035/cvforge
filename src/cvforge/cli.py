@@ -6,6 +6,7 @@ CVForge CLI - Build ATS-friendly CVs from YAML using Typst.
 import argparse
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 import typst
@@ -68,6 +69,19 @@ SECTION_TRANSLATIONS = {
     },
 }
 
+LIST_OF_MAP_SECTIONS = (
+    "experience",
+    "education",
+    "projects",
+    "languages",
+    "certifications",
+    "awards",
+)
+
+REQUIRED_IDENTITY_FIELDS = ("name", "role", "email")
+
+OPTIONAL_EMPTY_VALUES = (None, "")
+
 
 def get_templates_dir() -> Path:
     """Get the path to the templates directory."""
@@ -77,6 +91,101 @@ def get_templates_dir() -> Path:
 def get_template_dir(template_name: str = DEFAULT_TEMPLATE) -> Path:
     """Get the path to a specific template directory."""
     return get_templates_dir() / template_name
+
+
+def fail_yaml_validation(message: str) -> None:
+    print(f"Error: Invalid YAML: {message}", file=sys.stderr)
+    sys.exit(1)
+
+
+def is_optional_empty(value) -> bool:
+    return value in OPTIONAL_EMPTY_VALUES
+
+
+def type_name(value) -> str:
+    return type(value).__name__
+
+
+def validate_list_of_maps(data: dict, section: str) -> None:
+    value = data.get(section)
+    if is_optional_empty(value):
+        return
+
+    if not isinstance(value, list):
+        fail_yaml_validation(f"'{section}' must be a list, not {type_name(value)}.")
+
+    for index, item in enumerate(value, start=1):
+        if not isinstance(item, dict):
+            fail_yaml_validation(
+                f"'{section}[{index}]' must be a mapping, not {type_name(item)}."
+            )
+
+
+def validate_required_identity_fields(data: dict) -> None:
+    for field in REQUIRED_IDENTITY_FIELDS:
+        if field not in data:
+            fail_yaml_validation(f"missing required field '{field}'.")
+
+        value = data[field]
+        if not isinstance(value, str) or not value.strip():
+            fail_yaml_validation(f"'{field}' must be non-empty text.")
+
+
+def validate_yaml_shape(data: dict) -> None:
+    validate_required_identity_fields(data)
+
+    if "summary" in data and not is_optional_empty(data["summary"]):
+        if not isinstance(data["summary"], str):
+            fail_yaml_validation(
+                f"'summary' must be text, not {type_name(data['summary'])}."
+            )
+
+    if "skills" in data and not is_optional_empty(data["skills"]):
+        if not isinstance(data["skills"], list):
+            fail_yaml_validation(
+                f"'skills' must be a list of skill groups, not {type_name(data['skills'])}."
+            )
+
+        for index, skill in enumerate(data["skills"], start=1):
+            if not isinstance(skill, dict):
+                fail_yaml_validation(
+                    f"'skills[{index}]' must be a mapping, not {type_name(skill)}."
+                )
+            if "Category" not in skill:
+                fail_yaml_validation(
+                    f"'skills[{index}]' is missing required field 'Category'."
+                )
+            if "Items" not in skill:
+                fail_yaml_validation(
+                    f"'skills[{index}]' is missing required field 'Items'."
+                )
+            if not isinstance(skill["Category"], str):
+                fail_yaml_validation(
+                    f"'skills[{index}].Category' must be text, not {type_name(skill['Category'])}."
+                )
+            if not isinstance(skill["Items"], list):
+                fail_yaml_validation(
+                    f"'skills[{index}].Items' must be a list, not {type_name(skill['Items'])}."
+                )
+
+    for section in LIST_OF_MAP_SECTIONS:
+        validate_list_of_maps(data, section)
+
+    for section in ("experience", "education", "projects"):
+        for index, item in enumerate(data.get(section) or [], start=1):
+            description = item.get("description")
+            if is_optional_empty(description):
+                continue
+            if not isinstance(description, list):
+                fail_yaml_validation(
+                    f"'{section}[{index}].description' must be a list, not {type_name(description)}."
+                )
+
+    if "interests" in data and not is_optional_empty(data["interests"]):
+        if not isinstance(data["interests"], list):
+            fail_yaml_validation(
+                f"'interests' must be a list, not {type_name(data['interests'])}."
+            )
 
 def validate_yaml(yaml_path: Path) -> dict:
     """Load and validate YAML file, returning data dict."""
@@ -96,9 +205,20 @@ def validate_yaml(yaml_path: Path) -> dict:
         with open(yaml_path, 'r', encoding='utf-8') as f:
             data = yaml.safe_load(f)
         
+        if data is None:
+            print("Error: YAML file is empty.", file=sys.stderr)
+            sys.exit(1)
+
+        if not isinstance(data, dict):
+            fail_yaml_validation(
+                f"top-level document must be a mapping, not {type_name(data)}."
+            )
+
         if not data:
             print("Error: YAML file is empty.", file=sys.stderr)
             sys.exit(1)
+
+        validate_yaml_shape(data)
         
         font = data.get("font", "noto")
         if font not in FONT_OPTIONS:
@@ -152,94 +272,79 @@ def build_cv(input_file: Path) -> int:
         print(f"Error: Typst template '{typst_file}' not found.", file=sys.stderr)
         return 1
     
+    print(f"Building CV: {input_file} -> {output_file}", flush=True)
+
     input_abs = input_file.resolve()
     input_dir = input_abs.parent
-    yaml_in_template_dir = template_dir / input_file.name
-    
-    temp_copy = False
-    if input_abs != yaml_in_template_dir:
-        shutil.copy2(input_abs, yaml_in_template_dir)
-        temp_copy = True
-    
-    photo_in_template_dir = None
-    temp_photo_copy = False
-    
-    photo_path_str = data.get("photo") if data else None
-    
-    if photo_path_str is None:
-        try:
-            with open(input_abs, 'r', encoding='utf-8') as f:
-                for line in f:
-                    stripped = line.strip()
-                    if stripped.startswith("photo:"):
-                        photo_path_str = stripped.split(":", 1)[1].strip().strip('"').strip("'")
-                        break
-        except Exception:
-            pass
-    
-    if photo_path_str:
-        photo_path = Path(photo_path_str)
-        if not photo_path.is_absolute():
-            photo_path = input_dir / photo_path
-        
-        photo_path = photo_path.resolve()
-        
-        if photo_path.exists():
-            photo_in_template_dir = template_dir / photo_path.name
-            if photo_path != photo_in_template_dir.resolve():
-                shutil.copy2(photo_path, photo_in_template_dir)
-                temp_photo_copy = True
-            if yaml_in_template_dir.exists():
+
+    try:
+        with tempfile.TemporaryDirectory(prefix="cvforge-") as build_dir_name:
+            build_dir = Path(build_dir_name)
+            build_template_dir = build_dir / template_dir.name
+            shutil.copytree(template_dir, build_template_dir)
+
+            yaml_in_build_dir = build_template_dir / input_file.name
+            shutil.copy2(input_abs, yaml_in_build_dir)
+
+            photo_path_str = data.get("photo") if data else None
+
+            if photo_path_str is None:
                 try:
+                    with open(input_abs, 'r', encoding='utf-8') as f:
+                        for line in f:
+                            stripped = line.strip()
+                            if stripped.startswith("photo:"):
+                                photo_path_str = stripped.split(":", 1)[1].strip().strip('"').strip("'")
+                                break
+                except Exception:
+                    pass
+
+            if photo_path_str:
+                photo_path = Path(photo_path_str)
+                if not photo_path.is_absolute():
+                    photo_path = input_dir / photo_path
+
+                photo_path = photo_path.resolve()
+
+                if photo_path.exists():
+                    photo_in_build_dir = build_template_dir / f"cvforge-photo-{photo_path.name}"
+                    shutil.copy2(photo_path, photo_in_build_dir)
+
                     if YAML_AVAILABLE:
-                        with open(yaml_in_template_dir, 'r', encoding='utf-8') as f:
+                        with open(yaml_in_build_dir, 'r', encoding='utf-8') as f:
                             yaml_data = yaml.safe_load(f) or {}
-                        yaml_data["photo"] = photo_in_template_dir.name
-                        with open(yaml_in_template_dir, 'w', encoding='utf-8') as f:
+                        yaml_data["photo"] = photo_in_build_dir.name
+                        with open(yaml_in_build_dir, 'w', encoding='utf-8') as f:
                             yaml.safe_dump(yaml_data, f, sort_keys=False, allow_unicode=True)
                     else:
-                        with open(yaml_in_template_dir, 'r', encoding='utf-8') as f:
+                        with open(yaml_in_build_dir, 'r', encoding='utf-8') as f:
                             lines = f.readlines()
                         updated = False
                         for i, line in enumerate(lines):
                             stripped = line.lstrip()
                             if stripped.startswith("photo:"):
                                 indent = line[: len(line) - len(stripped)]
-                                lines[i] = f"{indent}photo: \"{photo_in_template_dir.name}\"\n"
+                                lines[i] = f"{indent}photo: \"{photo_in_build_dir.name}\"\n"
                                 updated = True
                                 break
                         if not updated:
-                            lines.append(f"photo: \"{photo_in_template_dir.name}\"\n")
-                        with open(yaml_in_template_dir, 'w', encoding='utf-8') as f:
+                            lines.append(f"photo: \"{photo_in_build_dir.name}\"\n")
+                        with open(yaml_in_build_dir, 'w', encoding='utf-8') as f:
                             f.writelines(lines)
-                except Exception:
-                    pass
-        else:
-            print(f"Warning: Photo file '{photo_path_str}' not found.", file=sys.stderr)
-    
-    print(f"Building CV: {input_file} -> {output_file}")
-    
-    try:
-        typst.compile(
-            input=str(typst_file),
-            output=str(output_file),
-            root=str(template_dir),
-            sys_inputs={"cv_data": input_file.name},
-        )
-        
-        if temp_copy and yaml_in_template_dir.exists():
-            yaml_in_template_dir.unlink()
-        if temp_photo_copy and photo_in_template_dir and photo_in_template_dir.exists():
-            photo_in_template_dir.unlink()
-        
+                else:
+                    print(f"Warning: Photo file '{photo_path_str}' not found.", file=sys.stderr)
+
+            typst.compile(
+                input=str(build_template_dir / "main.typ"),
+                output=str(output_file),
+                root=str(build_template_dir),
+                sys_inputs={"cv_data": input_file.name},
+            )
+
         print(f"✓ CV generated successfully: {output_file}")
         return 0
-        
+
     except Exception as e:
-        if temp_copy and yaml_in_template_dir.exists():
-            yaml_in_template_dir.unlink()
-        if temp_photo_copy and photo_in_template_dir and photo_in_template_dir.exists():
-            photo_in_template_dir.unlink()
         print(f"Error: Typst compilation failed:", file=sys.stderr)
         print(f"  {e}", file=sys.stderr)
         return 1
@@ -382,4 +487,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
