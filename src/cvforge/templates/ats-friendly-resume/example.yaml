@@ -4,10 +4,19 @@
 # CVForge renders sections in YAML order. Recommended order is below, but you can customize as needed.
 # Required fields: name, role, email.
 # Inline bold works in narrative text with double underscores, for example: __text__
-# Language affects section headings only: "en" or "tr".
+# Write \__ (in single quotes or unquoted text) for literal double underscores.
+# Quote dates and numbers you want shown exactly, e.g. gpa: "3.80" (3.80 unquoted becomes 3.8).
+# Language sets section headings: built-in "en" or "tr"; other codes use English unless section-titles is set.
 # Font options: "noto", "roboto", "liberation", "dejavu", "inter", "lato", "montserrat", "raleway", "ubuntu", "opensans", "sourcesans", "arial", "times", "calibri", "georgia", "garamond", "trebuchet"
 language: "en"
 font: "noto"
+
+# Layout (optional)
+# paper: "a4"          # "a4" (default) or "letter"
+# font-size: "10pt"    # body text size in pt
+# margin: "0.5in"      # page margin: pt, mm, cm or in
+# section-titles:      # override any heading, e.g. for other languages
+#   experience: "Work History"
 
 # Personal Information (name, role, and email must be non-empty text)
 name: "Your Name"
@@ -16,27 +25,27 @@ email: "your.email@example.com"
 phone: "+1 555 123 4567"
 location: "City, Country"
 website: "yourwebsite.com"
-# website-text: "Portfolio" # Optional: Custom display text (default: "Website")
+# website-text: "Portfolio" # Optional: Custom display text (default: the URL, which ATS parsers can read)
 linkedin: "linkedin.com/in/yourprofile"
-# linkedin-text: "LinkedIn Profile" # Optional: Custom display text (default: "LinkedIn")
+# linkedin-text: "LinkedIn" # Optional: Custom display text (default: the URL)
 github: "github.com/yourusername"
-# github-text: "GitHub Profile" # Optional: Custom display text (default: "GitHub")
+# github-text: "GitHub" # Optional: Custom display text (default: the URL)
 # photo: "photo.png"  # Optional: path is resolved relative to this YAML file
-# photo-width: "2.5cm"  # Optional: safe examples: "3cm", "2in", "80pt"
+# photo-width: "2.5cm"  # Optional: a length in pt, mm, cm or in, e.g. "3cm", "2in", "80pt"
 
 # Professional Summary
 summary: |
   A brief professional summary describing your __experience__, expertise, and career goals.
   Keep it concise and impactful, typically 2-3 sentences.
 
-# Technical Skills (must be a list of groups with Category and Items)
+# Technical Skills (list of groups with category and items; Category/Items also work)
 skills:
-  - Category: "Programming Languages"
-    Items: ["Python", "JavaScript", "TypeScript", "Go"]
-  - Category: "Frameworks & Libraries"
-    Items: ["React", "Node.js", "Django", "FastAPI"]
-  - Category: "Tools & Platforms"
-    Items: ["Docker", "Kubernetes", "AWS", "Git"]
+  - category: "Programming Languages"
+    items: ["Python", "JavaScript", "TypeScript", "Go"]
+  - category: "Frameworks & Libraries"
+    items: ["React", "Node.js", "Django", "FastAPI"]
+  - category: "Tools & Platforms"
+    items: ["Docker", "Kubernetes", "AWS", "Git"]
 
 # Work Experience (description must be a list of bullet strings)
 experience:

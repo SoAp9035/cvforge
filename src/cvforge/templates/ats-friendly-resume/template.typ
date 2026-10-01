@@ -11,34 +11,25 @@
   }
 }
 
-// Render paired __text__ segments as bold content and keep unmatched delimiters literal.
-#let render-inline-bold(text) = {
-  if text == none or text == "" or not text.contains("__") {
-    text
+// The CLI marks bold spans with U+E000 (start) and U+E001 (end).
+#let render-inline-bold(value) = {
+  if type(value) != str or not value.contains("\u{E000}") {
+    value
   } else {
-    let parts = text.split("__")
-    let has-unmatched-tail = calc.rem(parts.len(), 2) == 0
-    let render-count = if has-unmatched-tail { parts.len() - 1 } else { parts.len() }
-
-    let chunks = ()
-    for (index, part) in parts.enumerate() {
-      if index >= render-count {
-        chunks.push("__" + part)
-      } else if calc.rem(index, 2) == 1 {
-        chunks.push(strong(part))
-      } else {
-        chunks.push(part)
-      }
+    let parts = value.split("\u{E000}")
+    let chunks = (parts.first(),)
+    for part in parts.slice(1) {
+      let pieces = part.split("\u{E001}")
+      chunks.push(strong(pieces.first()))
+      chunks.push(pieces.slice(1).join(""))
     }
-
-    chunks.join("")
+    chunks.join()
   }
 }
 
 #let resume(
   // Name of the author (you)
   author: "",
-  author-position: left,
   // Role/Position
   role: "",
   // Photo (optional)
@@ -49,17 +40,15 @@
   email: "",
   phone: "",
   linkedin: "",
-  linkedin-text: "LinkedIn",
+  linkedin-text: "",
   github: "",
-  github-text: "GitHub",
+  github-text: "",
   website: "",
-  website-text: "Website",
-  personal-info-position: left,
+  website-text: "",
   // Document values and format
-  color-enabled: true,
-  text-color: "#000080",
   font: "New Computer Modern",
-  paper: "us-letter",
+  paper: "a4",
+  margin: 0.5in,
   author-font-size: 20pt,
   font-size: 10pt,
   lang: "en",
@@ -68,37 +57,31 @@
   // Sets document metadata
   set document(author: author, title: author)
 
-  // Document-wide formatting, including font and margins
+  // Hyphenation is off so ATS parsers never see split keywords.
   set text(
     font: font,
     size: font-size,
     lang: lang,
     ligatures: false,
+    hyphenate: false,
   )
   set page(
-    margin: 0.5in,
+    margin: margin,
     paper: paper,
   )
 
-  // Accent Color Styling
-  show heading: set text(fill: if color-enabled { rgb(text-color) } else { black })
-  show link: set text(fill: if color-enabled { rgb(text-color) } else { blue })
-
-  // Link styles
+  show link: set text(fill: blue)
   show link: underline
 
   // Personal Information
-  // display-text: optional text to show instead of the raw URL
-  let contact-item(value, prefix: "", link-type: "", display-text: "") = {
+  // display-text: text to show instead of the raw value
+  let contact-item(value, link-type: "", display-text: "") = {
     if value != "" {
-      if link-type != "" {
-        // Use display-text if provided, otherwise fall back to the value
-        let shown-text = if display-text != "" { display-text } else { value }
-        if link-type == "https://" {
-          link(normalize-url(value))[#shown-text]
-        } else {
-          link(link-type + value)[#(prefix + shown-text)]
-        }
+      let shown-text = if display-text != "" { display-text } else { value }
+      if link-type == "https://" {
+        link(normalize-url(value))[#shown-text]
+      } else if link-type != "" {
+        link(link-type + value)[#shown-text]
       } else {
         value
       }
@@ -115,6 +98,16 @@
     contact-item(website, link-type: "https://", display-text: website-text),
   ).filter(x => x != none)
 
+  let header = [
+    #text(weight: "bold", size: author-font-size)[#author]
+    #if role != "" [
+      #v(0.2em)
+      #text(size: 12pt, style: "italic")[#role]
+    ]
+    #v(0.3em)
+    #text(size: font-size)[#contact-items.join("  |  ")]
+  ]
+
   // Header layout: Name, role, and contact on left; photo on right (if provided)
   // ATS-friendly: text is plain and accessible, photo is decorative only
   if photo != none {
@@ -122,37 +115,19 @@
       columns: (1fr, auto),
       column-gutter: 1em,
       align: (left + horizon, right + horizon),
-      [
-        #text(weight: "bold", size: author-font-size, fill: if color-enabled { rgb(text-color) } else { black })[#author]
-        #if role != "" [
-          #v(0.2em)
-          #text(size: 12pt, style: "italic")[#role]
-        ]
-        #v(0.3em)
-        #text(size: font-size)[#contact-items.join("  |  ")]
-      ],
-      [
-        #box(
-          clip: true,
-          radius: 4pt,
-          stroke: 0.5pt + luma(200),
-          image(photo, width: photo-width)
-        )
-      ],
+      header,
+      box(
+        clip: true,
+        radius: 4pt,
+        stroke: 0.5pt + luma(200),
+        image(photo, width: photo-width),
+      ),
     )
   } else {
     // No photo: display header centered for a balanced look
-    align(center)[
-      #text(weight: "bold", size: author-font-size, fill: if color-enabled { rgb(text-color) } else { black })[#author]
-      #if role != "" [
-        #v(0.2em)
-        #text(size: 12pt, style: "italic")[#role]
-      ]
-      #v(0.3em)
-      #text(size: font-size)[#contact-items.join("  |  ")]
-    ]
+    align(center, header)
   }
-  
+
   v(0.5em)
 
   show heading.where(level: 2): it => [
@@ -188,82 +163,42 @@
   ]
 }
 
-// Dates that can be use for components
-//
-// Example:
-//
-// Sep 2021 - Aug 2025 (end date is defined)
-//
-// Sep 2021 (if no end date defined)
-#let dates-util(
-  start-date: "",
-  end-date: "",
-) = {
-  if end-date == "" {
-    start-date
-  } else {
-    start-date + " " + $dash.em$ + " " + end-date
-  }
-}
-
 // Resume components are listed below
 // If you want to add some additional components, please make a PR
 
 // Work Component
-//
-// Optional arguments: tech-used
 #let work(
   company: "",
   role: "",
   dates: "",
-  tech-used: "",
   location: "",
 ) = {
   block(spacing: 0.65em)[
-    #if tech-used == "" [
-      #two-by-two-layout(
-        top-left: strong(render-inline-bold(company)),
-        top-right: render-inline-bold(dates),
-        bottom-left: render-inline-bold(role),
-        bottom-right: emph(render-inline-bold(location)),
-      )
-    ] else [
-      #two-by-two-layout(
-        top-left: strong(render-inline-bold(company)) + " " + "|" + " " + strong(render-inline-bold(role)),
-        top-right: render-inline-bold(dates),
-        bottom-left: render-inline-bold(tech-used),
-        bottom-right: emph(render-inline-bold(location)),
-      )
-    ]
+    #two-by-two-layout(
+      top-left: strong(render-inline-bold(company)),
+      top-right: render-inline-bold(dates),
+      bottom-left: render-inline-bold(role),
+      bottom-right: emph(render-inline-bold(location)),
+    )
   ]
 }
 
 // Project Component
 //
-// Optional arguments: tech-used, url-text
+// Optional arguments: url, url-text
 #let project(
   name: "",
   dates: "",
-  tech-used: "",
   url: "",
   url-text: "",
 ) = {
   // Use url-text if provided, otherwise fall back to the URL itself
   let display-text = if url-text != "" { url-text } else { url }
   block(spacing: 0.65em)[
-    #if tech-used == "" [
-      #one-by-one-layout(
-        left: [*#render-inline-bold(name)* #if url != "" and url != none [(#link(normalize-url(url))[#display-text])]],
-        right: render-inline-bold(dates),
-      )
-    ] else [
-      #two-by-two-layout(
-        top-left: strong(render-inline-bold(name)),
-        top-right: render-inline-bold(dates),
-        bottom-left: render-inline-bold(tech-used),
-        bottom-right: if url != "" and url != none [(#link(normalize-url(url))[#display-text])] else [],
-      )
-    ]
+    #one-by-one-layout(
+      left: [*#render-inline-bold(name)* #if url != "" [(#link(normalize-url(url))[#display-text])]],
+      right: render-inline-bold(dates),
+    )
   ]
 }
 

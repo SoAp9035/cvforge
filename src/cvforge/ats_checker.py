@@ -5,40 +5,54 @@ This module analyzes PDF files to determine if they are ATS-friendly.
 """
 
 import os
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-try:
-    from pypdf import PdfReader
-    PYPDF_AVAILABLE = True
-except ImportError:
-    PYPDF_AVAILABLE = False
+from pypdf import PdfReader
 
 
+def normalize_font_name(name: str) -> str:
+    """Lowercase and drop spaces, hyphens and other separators."""
+    return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
+# Stored normalized, so "LiberationSerif-Bold" matches "liberation serif".
 ATS_FRIENDLY_FONTS = {
-    "arial", "helvetica", "calibri", "verdana", "tahoma",
-    "trebuchet", "trebuchet ms", "lucida", "lucida sans",
-    "times", "times new roman", "georgia", "garamond",
-    "cambria", "palatino",
-    "courier", "courier new",
-    "noto sans", "noto serif", "roboto", "liberation sans",
-    "liberation serif", "dejavu sans", "dejavu serif",
-    "inter", "source sans", "source sans pro", "open sans",
-    "lato", "montserrat", "raleway", "ubuntu",
+    normalize_font_name(name) for name in (
+        "arial", "helvetica", "calibri", "carlito", "verdana", "tahoma",
+        "trebuchet", "lucida", "times", "georgia", "gelasio", "garamond",
+        "cambria", "palatino", "courier",
+        "noto sans", "noto serif", "roboto", "liberation sans",
+        "liberation serif", "dejavu sans", "dejavu serif", "fira sans",
+        "inter", "source sans", "open sans",
+        "lato", "montserrat", "raleway", "ubuntu",
+    )
 }
 
-EXPECTED_SECTIONS = {
-    "summary", "özet", "professional summary", "profile", "profil",
-    "experience", "work experience", "deneyim", "iş deneyimi",
-    "education", "eğitim",
-    "skills", "technical skills", "yetenekler", "teknik yetenekler",
-    "projects", "projeler",
-    "certifications", "sertifikalar", "certificates",
-    "languages", "diller",
-    "awards", "ödüller",
-    "interests", "ilgi alanları",
+def fold_heading(text: str) -> str:
+    """Case-fold a heading so Turkish dotted/dotless "i" variants compare equal."""
+    return text.strip().rstrip(":").strip().lower().replace("i\u0307", "i").replace("ı", "i")
+
+
+# Heading text -> canonical section, so aliases count once.
+_SECTION_HEADINGS = {
+    "summary": "summary", "professional summary": "summary",
+    "profile": "summary", "özet": "summary", "profil": "summary",
+    "experience": "experience", "work experience": "experience",
+    "deneyim": "experience", "iş deneyimi": "experience",
+    "education": "education", "eğitim": "education",
+    "skills": "skills", "technical skills": "skills",
+    "yetenekler": "skills", "teknik yetenekler": "skills",
+    "projects": "projects", "projeler": "projects",
+    "certifications": "certifications", "certificates": "certifications",
+    "sertifikalar": "certifications",
+    "languages": "languages", "diller": "languages",
+    "awards": "awards", "ödüller": "awards",
+    "interests": "interests", "ilgi alanları": "interests",
 }
+SECTION_HEADINGS = {fold_heading(k): v for k, v in _SECTION_HEADINGS.items()}
 
 MAX_FILE_SIZE_MB = 1.0
 MAX_FILE_SIZE_BYTES = int(MAX_FILE_SIZE_MB * 1024 * 1024)
@@ -101,9 +115,6 @@ class ATSChecker:
     
     def load_pdf(self) -> bool:
         """Load the PDF file. Returns True if successful."""
-        if not PYPDF_AVAILABLE:
-            return False
-        
         try:
             self.reader = PdfReader(str(self.pdf_path))
             return True
@@ -218,16 +229,13 @@ class ATSChecker:
                 severity="info"
             )
         
-        # Normalize and check fonts
-        non_friendly = []
-        for font in fonts:
-            font_lower = font.lower()
-            is_friendly = any(
-                friendly in font_lower 
+        non_friendly = sorted(
+            font for font in fonts
+            if not any(
+                friendly in normalize_font_name(font)
                 for friendly in ATS_FRIENDLY_FONTS
             )
-            if not is_friendly:
-                non_friendly.append(font)
+        )
         
         if not non_friendly:
             return ATSCheck(
@@ -239,8 +247,8 @@ class ATSChecker:
         else:
             return ATSCheck(
                 name="Font Analysis",
-                passed=True,
-                message=f"Found fonts: {', '.join(fonts)}. Some may not be standard.",
+                passed=False,
+                message=f"Non-standard fonts found: {', '.join(non_friendly)}",
                 severity="warning"
             )
     
@@ -257,12 +265,12 @@ class ATSChecker:
                 severity="error"
             )
         
-        text_lower = self.extracted_text.lower()
-        found_sections = []
-        
-        for section in EXPECTED_SECTIONS:
-            if section in text_lower:
-                found_sections.append(section)
+        # Count a section only when a whole line is its heading.
+        found_sections = set()
+        for line in self.extracted_text.splitlines():
+            heading = fold_heading(line)
+            if heading in SECTION_HEADINGS:
+                found_sections.add(SECTION_HEADINGS[heading])
         
         if len(found_sections) >= MIN_SECTIONS:
             return ATSCheck(
@@ -361,7 +369,7 @@ class ATSChecker:
             report.add_check(ATSCheck(
                 name="PDF Load",
                 passed=False,
-                message="Could not load PDF file. Install 'pypdf' for ATS analysis.",
+                message="Could not load PDF file (it may be corrupted or encrypted).",
                 severity="error"
             ))
             report.calculate_score()

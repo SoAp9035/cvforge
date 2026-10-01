@@ -1,113 +1,60 @@
 #import "./template.typ": *
 
-#let cv_data_path = sys.inputs.at("cv_data", default: "cv.yaml")
-#let data = yaml(cv_data_path)
+// Both files are written by the CVForge CLI after validation, so every
+// content value here is text and inline-bold markers are already resolved.
+#let data = yaml(sys.inputs.at("cv_data", default: "cvforge-data.yaml"))
+#let settings = yaml(sys.inputs.at("cv_settings", default: "cvforge-settings.yaml"))
 
-#let get(field, default: none) = {
+#let get(field, default: "") = {
   if field in data { data.at(field) } else { default }
 }
 
-#let has(field) = {
-  field in data and data.at(field) != none and data.at(field) != ""
-}
-
-#let has-text(val) = {
-  val != none and val != ""
-}
-
-#let has-list(val) = {
-  val != none and val.len() > 0
-}
-
-#let font_map = (
-  "noto": ("Noto Sans", "DejaVu Sans", "Liberation Sans", "Arial"),
-  "roboto": ("Roboto", "Noto Sans", "DejaVu Sans", "Arial"),
-  "liberation": ("Liberation Sans", "DejaVu Sans", "Noto Sans", "Arial"),
-  "dejavu": ("DejaVu Sans", "Liberation Sans", "Noto Sans", "Arial"),
-  "inter": ("Inter", "Noto Sans", "DejaVu Sans", "Arial"),
-  "lato": ("Lato", "Noto Sans", "DejaVu Sans", "Arial"),
-  "montserrat": ("Montserrat", "Noto Sans", "DejaVu Sans", "Arial"),
-  "raleway": ("Raleway", "Noto Sans", "DejaVu Sans", "Arial"),
-  "ubuntu": ("Ubuntu", "Noto Sans", "DejaVu Sans", "Arial"),
-  "opensans": ("Open Sans", "Noto Sans", "DejaVu Sans", "Arial"),
-  "sourcesans": ("Source Sans Pro", "Noto Sans", "DejaVu Sans", "Arial"),
-  "arial": ("Arial", "Liberation Sans", "Noto Sans", "DejaVu Sans"),
-  "times": ("Times New Roman", "Times", "Liberation Serif", "Noto Serif"),
-  "calibri": ("Calibri", "Carlito", "Liberation Sans", "Arial"),
-  "georgia": ("Georgia", "Gelasio", "Liberation Serif", "Noto Serif"),
-  "garamond": ("Garamond", "EB Garamond", "Liberation Serif", "Noto Serif"),
-  "trebuchet": ("Trebuchet MS", "Fira Sans", "Liberation Sans", "Arial"),
-)
-
-#let selected_font = get("font", default: "noto")
-#let font_family = if selected_font in font_map { font_map.at(selected_font) } else { font_map.at("noto") }
-
-#let lang = get("language", default: "en")
-
-#let tr = (
-  "en": (
-    "summary": "Summary",
-    "skills": "Technical Skills",
-    "experience": "Experience",
-    "education": "Education",
-    "projects": "Projects",
-    "languages": "Languages",
-    "certifications": "Certifications",
-    "awards": "Awards",
-    "interests": "Interests",
-  ),
-  "tr": (
-    "summary": "Özet",
-    "skills": "Teknik Yetenekler",
-    "experience": "Deneyim",
-    "education": "Eğitim",
-    "projects": "Projeler",
-    "languages": "Diller",
-    "certifications": "Sertifikalar",
-    "awards": "Ödüller",
-    "interests": "İlgi Alanları",
-  ),
-)
-
-#let t(key) = {
-  let lang_key = if lang in tr { lang } else { "en" }
-  tr.at(lang_key).at(key)
-}
+#let t(key) = settings.titles.at(key)
 
 #show: resume.with(
-  author: get("name", default: "Name"),
-  author-position: left,
-  role: get("role", default: ""),
-  photo: if has("photo") { data.photo } else { none },
-  photo-width: eval(get("photo-width", default: "2.5cm")),
-  location: get("location", default: ""),
-  email: get("email", default: ""),
-  phone: get("phone", default: ""),
-  linkedin: get("linkedin", default: ""),
-  linkedin-text: get("linkedin-text", default: "LinkedIn"),
-  github: get("github", default: ""),
-  github-text: get("github-text", default: "GitHub"),
-  website: get("website", default: ""),
-  website-text: get("website-text", default: "Website"),
-  personal-info-position: left,
-  color-enabled: false,
-  font: font_family,
-  paper: "a4",
-  author-font-size: 20pt,
-  font-size: 10pt,
-  lang: lang,
+  author: get("name"),
+  role: get("role"),
+  photo: if "photo" in data { data.photo } else { none },
+  photo-width: eval(settings.at("photo-width")),
+  location: get("location"),
+  email: get("email"),
+  phone: get("phone"),
+  linkedin: get("linkedin"),
+  linkedin-text: get("linkedin-text"),
+  github: get("github"),
+  github-text: get("github-text"),
+  website: get("website"),
+  website-text: get("website-text"),
+  font: settings.at("font-family"),
+  paper: settings.paper,
+  margin: eval(settings.margin),
+  font-size: eval(settings.at("font-size")),
+  lang: settings.language,
 )
 
+// Name, then optional " (issuer)" and " – date", for certifications and awards.
+#let credential(entry) = {
+  strong(render-inline-bold(entry.at("name", default: "")))
+  if "issuer" in entry [ (#render-inline-bold(entry.issuer))]
+  if "date" in entry [ – #render-inline-bold(entry.date)]
+}
+
+#let bullets(entry) = {
+  for bullet in entry.at("description", default: ()) [
+    - #render-inline-bold(bullet)
+  ]
+}
+
 #for (key, val) in data.pairs() {
-  if key == "summary" and has-text(val) [
+  if key == "summary" [
     == #t("summary")
     #render-inline-bold(val)
-  ] else if key == "skills" and has-list(val) [
+  ] else if key == "skills" [
     == #t("skills")
     #for skill in val [
-      - *#render-inline-bold(skill.Category)*: #render-inline-bold(skill.Items.join(", "))
+      - *#render-inline-bold(skill.category)*: #render-inline-bold(skill.items.join(", "))
     ]
-  ] else if key == "experience" and has-list(val) [
+  ] else if key == "experience" [
     == #t("experience")
     #for job in val [
       #work(
@@ -116,13 +63,9 @@
         dates: job.at("date", default: ""),
         location: job.at("location", default: ""),
       )
-      #if "description" in job [
-        #for bullet in job.description [
-          - #render-inline-bold(bullet)
-        ]
-      ]
+      #bullets(job)
     ]
-  ] else if key == "education" and has-list(val) [
+  ] else if key == "education" [
     == #t("education")
     #for entry in val [
       #edu(
@@ -132,47 +75,39 @@
         location: entry.at("location", default: ""),
         gpa: entry.at("gpa", default: ""),
       )
-      #if "description" in entry [
-        #for bullet in entry.description [
-          - #render-inline-bold(bullet)
-        ]
-      ]
+      #bullets(entry)
     ]
-  ] else if key == "projects" and has-list(val) [
+  ] else if key == "projects" [
     == #t("projects")
     #for proj in val [
       #project(
         name: proj.at("name", default: ""),
         dates: proj.at("date", default: ""),
-        url: proj.at("url", default: none),
+        url: proj.at("url", default: ""),
         url-text: proj.at("url-text", default: ""),
       )
       #if "role" in proj [
         #text(style: "italic")[#render-inline-bold(proj.role)]
       ]
-      #if "description" in proj [
-        #for bullet in proj.description [
-          - #render-inline-bold(bullet)
-        ]
-      ]
+      #bullets(proj)
     ]
-  ] else if key == "languages" and has-list(val) [
+  ] else if key == "languages" [
     == #t("languages")
     #for lang_item in val [
-      - *#render-inline-bold(lang_item.at("name", default: ""))*: #render-inline-bold(lang_item.at("level", default: ""))
+      - *#render-inline-bold(lang_item.at("name", default: ""))*#if "level" in lang_item [: #render-inline-bold(lang_item.level)]
     ]
-  ] else if key == "certifications" and has-list(val) [
+  ] else if key == "certifications" [
     == #t("certifications")
     #for cert in val [
-      - *#render-inline-bold(cert.at("name", default: ""))* #if "issuer" in cert [(#render-inline-bold(cert.issuer))] #if "date" in cert [- #render-inline-bold(cert.date)]
+      - #credential(cert)
     ]
-  ] else if key == "awards" and has-list(val) [
+  ] else if key == "awards" [
     == #t("awards")
     #for award in val [
-      - *#render-inline-bold(award.at("name", default: ""))* #if "issuer" in award [(#render-inline-bold(award.issuer))] #if "date" in award [- #render-inline-bold(award.date)]
+      - #credential(award)
     ]
-  ] else if key == "interests" and has-list(val) [
+  ] else if key == "interests" [
     == #t("interests")
-    #render-inline-bold(val.join(" • "))
+    #val.map(render-inline-bold).join(" • ")
   ]
 }

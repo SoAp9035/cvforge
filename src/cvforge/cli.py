@@ -10,77 +10,13 @@ import tempfile
 from pathlib import Path
 
 import typst
-
-try:
-    import yaml
-    YAML_AVAILABLE = True
-except ImportError:
-    YAML_AVAILABLE = False
+import yaml
 
 from . import __version__
-from .ats_checker import check_ats, PYPDF_AVAILABLE
-
-FONT_OPTIONS = {
-    "noto": ("Noto Sans", ["DejaVu Sans", "Liberation Sans", "Arial"]),
-    "roboto": ("Roboto", ["Noto Sans", "DejaVu Sans", "Arial"]),
-    "liberation": ("Liberation Sans", ["DejaVu Sans", "Noto Sans", "Arial"]),
-    "dejavu": ("DejaVu Sans", ["Liberation Sans", "Noto Sans", "Arial"]),
-    "inter": ("Inter", ["Noto Sans", "DejaVu Sans", "Arial"]),
-    "lato": ("Lato", ["Noto Sans", "DejaVu Sans", "Arial"]),
-    "montserrat": ("Montserrat", ["Noto Sans", "DejaVu Sans", "Arial"]),
-    "raleway": ("Raleway", ["Noto Sans", "DejaVu Sans", "Arial"]),
-    "ubuntu": ("Ubuntu", ["Noto Sans", "DejaVu Sans", "Arial"]),
-    "opensans": ("Open Sans", ["Noto Sans", "DejaVu Sans", "Arial"]),
-    "sourcesans": ("Source Sans Pro", ["Noto Sans", "DejaVu Sans", "Arial"]),
-    "arial": ("Arial", ["Liberation Sans", "Noto Sans", "DejaVu Sans"]),
-    "times": ("Times New Roman", ["Times", "Liberation Serif", "Noto Serif"]),
-    "calibri": ("Calibri", ["Carlito", "Liberation Sans", "Arial"]),
-    "georgia": ("Georgia", ["Gelasio", "Liberation Serif", "Noto Serif"]),
-    "garamond": ("Garamond", ["EB Garamond", "Liberation Serif", "Noto Serif"]),
-    "trebuchet": ("Trebuchet MS", ["Fira Sans", "Liberation Sans", "Arial"]),
-}
+from .ats_checker import check_ats
+from .config import FONT_OPTIONS, ConfigError, load_cv
 
 DEFAULT_TEMPLATE = "ats-friendly-resume"
-
-LANGUAGE_OPTIONS = ["en", "tr"]
-
-SECTION_TRANSLATIONS = {
-    "en": {
-        "summary": "Summary",
-        "skills": "Technical Skills",
-        "experience": "Experience",
-        "education": "Education",
-        "projects": "Projects",
-        "languages": "Languages",
-        "certifications": "Certifications",
-        "awards": "Awards",
-        "interests": "Interests",
-    },
-    "tr": {
-        "summary": "Özet",
-        "skills": "Teknik Yetenekler",
-        "experience": "Deneyim",
-        "education": "Eğitim",
-        "projects": "Projeler",
-        "languages": "Diller",
-        "certifications": "Sertifikalar",
-        "awards": "Ödüller",
-        "interests": "İlgi Alanları",
-    },
-}
-
-LIST_OF_MAP_SECTIONS = (
-    "experience",
-    "education",
-    "projects",
-    "languages",
-    "certifications",
-    "awards",
-)
-
-REQUIRED_IDENTITY_FIELDS = ("name", "role", "email")
-
-OPTIONAL_EMPTY_VALUES = (None, "")
 
 
 def get_templates_dir() -> Path:
@@ -93,161 +29,75 @@ def get_template_dir(template_name: str = DEFAULT_TEMPLATE) -> Path:
     return get_templates_dir() / template_name
 
 
-def fail_yaml_validation(message: str) -> None:
-    print(f"Error: Invalid YAML: {message}", file=sys.stderr)
-    sys.exit(1)
+def resolve_output(input_file: Path, output: Path | None) -> Path | None:
+    if output is None:
+        return input_file.with_suffix(".pdf").resolve()
+    if output.is_dir():
+        return (output / input_file.with_suffix(".pdf").name).resolve()
+    if output.suffix.lower() != ".pdf":
+        print("Error: Output file must end with .pdf", file=sys.stderr)
+        return None
+    output.parent.mkdir(parents=True, exist_ok=True)
+    return output.resolve()
 
 
-def is_optional_empty(value) -> bool:
-    return value in OPTIONAL_EMPTY_VALUES
+def installed_font_families() -> set[str]:
+    try:
+        return {name.lower() for name in typst.Fonts().families()}
+    except Exception:
+        return set()
 
 
-def type_name(value) -> str:
-    return type(value).__name__
+def warn_missing_font(settings: dict) -> None:
+    families = settings["font-family"]
+    installed = installed_font_families()
+    if not installed or families[0].lower() in installed:
+        return
+    fallback = next((f for f in families[1:] if f.lower() in installed), None)
+    used = f"'{fallback}'" if fallback else "Typst's built-in default font"
+    print(
+        f"Warning: font '{families[0]}' (font: {settings['font-key']}) is not installed; "
+        f"using {used} instead.",
+        file=sys.stderr,
+    )
 
 
-def validate_list_of_maps(data: dict, section: str) -> None:
-    value = data.get(section)
-    if is_optional_empty(value):
+def copy_photo(content: dict, input_dir: Path, build_dir: Path) -> None:
+    """Copy the photo next to the template, or drop it with a warning."""
+    photo = content.get("photo")
+    if not photo:
         return
 
-    if not isinstance(value, list):
-        fail_yaml_validation(f"'{section}' must be a list, not {type_name(value)}.")
+    photo_path = Path(photo)
+    if not photo_path.is_absolute():
+        photo_path = input_dir / photo_path
+    photo_path = photo_path.resolve()
 
-    for index, item in enumerate(value, start=1):
-        if not isinstance(item, dict):
-            fail_yaml_validation(
-                f"'{section}[{index}]' must be a mapping, not {type_name(item)}."
-            )
+    if not photo_path.is_file():
+        print(
+            f"Warning: photo file '{photo}' not found; building without a photo.",
+            file=sys.stderr,
+        )
+        del content["photo"]
+        return
 
-
-def validate_required_identity_fields(data: dict) -> None:
-    for field in REQUIRED_IDENTITY_FIELDS:
-        if field not in data:
-            fail_yaml_validation(f"missing required field '{field}'.")
-
-        value = data[field]
-        if not isinstance(value, str) or not value.strip():
-            fail_yaml_validation(f"'{field}' must be non-empty text.")
+    target = build_dir / f"cvforge-photo{photo_path.suffix.lower()}"
+    shutil.copy2(photo_path, target)
+    content["photo"] = target.name
 
 
-def validate_yaml_shape(data: dict) -> None:
-    validate_required_identity_fields(data)
-
-    if "summary" in data and not is_optional_empty(data["summary"]):
-        if not isinstance(data["summary"], str):
-            fail_yaml_validation(
-                f"'summary' must be text, not {type_name(data['summary'])}."
-            )
-
-    if "skills" in data and not is_optional_empty(data["skills"]):
-        if not isinstance(data["skills"], list):
-            fail_yaml_validation(
-                f"'skills' must be a list of skill groups, not {type_name(data['skills'])}."
-            )
-
-        for index, skill in enumerate(data["skills"], start=1):
-            if not isinstance(skill, dict):
-                fail_yaml_validation(
-                    f"'skills[{index}]' must be a mapping, not {type_name(skill)}."
-                )
-            if "Category" not in skill:
-                fail_yaml_validation(
-                    f"'skills[{index}]' is missing required field 'Category'."
-                )
-            if "Items" not in skill:
-                fail_yaml_validation(
-                    f"'skills[{index}]' is missing required field 'Items'."
-                )
-            if not isinstance(skill["Category"], str):
-                fail_yaml_validation(
-                    f"'skills[{index}].Category' must be text, not {type_name(skill['Category'])}."
-                )
-            if not isinstance(skill["Items"], list):
-                fail_yaml_validation(
-                    f"'skills[{index}].Items' must be a list, not {type_name(skill['Items'])}."
-                )
-
-    for section in LIST_OF_MAP_SECTIONS:
-        validate_list_of_maps(data, section)
-
-    for section in ("experience", "education", "projects"):
-        for index, item in enumerate(data.get(section) or [], start=1):
-            description = item.get("description")
-            if is_optional_empty(description):
-                continue
-            if not isinstance(description, list):
-                fail_yaml_validation(
-                    f"'{section}[{index}].description' must be a list, not {type_name(description)}."
-                )
-
-    if "interests" in data and not is_optional_empty(data["interests"]):
-        if not isinstance(data["interests"], list):
-            fail_yaml_validation(
-                f"'interests' must be a list, not {type_name(data['interests'])}."
-            )
-
-def validate_yaml(yaml_path: Path) -> dict:
-    """Load and validate YAML file, returning data dict."""
-    if not YAML_AVAILABLE:
-        try:
-            with open(yaml_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            if not content.strip():
-                print("Error: YAML file is empty.", file=sys.stderr)
-                sys.exit(1)
-            return {}
-        except Exception as e:
-            print(f"Error reading YAML file: {e}", file=sys.stderr)
-            sys.exit(1)
-    
-    try:
-        with open(yaml_path, 'r', encoding='utf-8') as f:
-            data = yaml.safe_load(f)
-        
-        if data is None:
-            print("Error: YAML file is empty.", file=sys.stderr)
-            sys.exit(1)
-
-        if not isinstance(data, dict):
-            fail_yaml_validation(
-                f"top-level document must be a mapping, not {type_name(data)}."
-            )
-
-        if not data:
-            print("Error: YAML file is empty.", file=sys.stderr)
-            sys.exit(1)
-
-        validate_yaml_shape(data)
-        
-        font = data.get("font", "noto")
-        if font not in FONT_OPTIONS:
-            print(f"Warning: Unknown font '{font}'. Using 'noto'.", file=sys.stderr)
-            print(f"Available fonts: {', '.join(FONT_OPTIONS.keys())}", file=sys.stderr)
-            data["font"] = "noto"
-        
-        language = data.get("language", "en")
-        if language not in LANGUAGE_OPTIONS:
-            print(f"Warning: Unknown language '{language}'. Using 'en'.", file=sys.stderr)
-            print(f"Available languages: {', '.join(LANGUAGE_OPTIONS)}", file=sys.stderr)
-            data["language"] = "en"
-        
-        return data
-    
-    except yaml.YAMLError as e:
-        print(f"Error: Invalid YAML syntax: {e}", file=sys.stderr)
-        sys.exit(1)
-    except Exception as e:
-        print(f"Error reading YAML file: {e}", file=sys.stderr)
-        sys.exit(1)
+def write_yaml(path: Path, data: dict) -> None:
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.safe_dump(data, f, sort_keys=False, allow_unicode=True)
 
 
-def build_cv(input_file: Path) -> int:
+def build_cv(input_file: Path, output: Path | None = None) -> int:
     """
     Build CV from YAML file using Typst.
     
     Args:
         input_file: Path to the YAML input file
+        output: Optional output PDF path or directory
         
     Returns:
         0 on success, 1 on failure
@@ -259,93 +109,49 @@ def build_cv(input_file: Path) -> int:
     if input_file.suffix.lower() not in ('.yaml', '.yml'):
         print("Error: Input file must be a YAML file (.yaml or .yml)", file=sys.stderr)
         return 1
-    
-    # Validate YAML content and get data
-    data = validate_yaml(input_file)
-    
-    output_file = input_file.with_suffix('.pdf').resolve()
-    
-    template_dir = get_template_dir()
-    typst_file = template_dir / "main.typ"
-    
-    if not typst_file.exists():
-        print(f"Error: Typst template '{typst_file}' not found.", file=sys.stderr)
-        return 1
-    
-    print(f"Building CV: {input_file} -> {output_file}", flush=True)
 
-    input_abs = input_file.resolve()
-    input_dir = input_abs.parent
+    try:
+        content, settings = load_cv(input_file)
+    except ConfigError as e:
+        print(f"Error: Invalid YAML: {e}", file=sys.stderr)
+        return 1
+
+    output_file = resolve_output(input_file, output)
+    if output_file is None:
+        return 1
+
+    template_dir = get_template_dir()
+    if not (template_dir / "main.typ").exists():
+        print(f"Error: Typst template '{template_dir / 'main.typ'}' not found.", file=sys.stderr)
+        return 1
+
+    print(f"Building CV: {input_file} -> {output_file}", flush=True)
+    warn_missing_font(settings)
 
     try:
         with tempfile.TemporaryDirectory(prefix="cvforge-") as build_dir_name:
-            build_dir = Path(build_dir_name)
-            build_template_dir = build_dir / template_dir.name
-            shutil.copytree(template_dir, build_template_dir)
+            build_dir = Path(build_dir_name) / template_dir.name
+            shutil.copytree(template_dir, build_dir)
 
-            yaml_in_build_dir = build_template_dir / input_file.name
-            shutil.copy2(input_abs, yaml_in_build_dir)
+            copy_photo(content, input_file.resolve().parent, build_dir)
+            write_yaml(build_dir / "cvforge-data.yaml", content)
+            write_yaml(build_dir / "cvforge-settings.yaml", settings)
 
-            photo_path_str = data.get("photo") if data else None
-
-            if photo_path_str is None:
-                try:
-                    with open(input_abs, 'r', encoding='utf-8') as f:
-                        for line in f:
-                            stripped = line.strip()
-                            if stripped.startswith("photo:"):
-                                photo_path_str = stripped.split(":", 1)[1].strip().strip('"').strip("'")
-                                break
-                except Exception:
-                    pass
-
-            if photo_path_str:
-                photo_path = Path(photo_path_str)
-                if not photo_path.is_absolute():
-                    photo_path = input_dir / photo_path
-
-                photo_path = photo_path.resolve()
-
-                if photo_path.exists():
-                    photo_in_build_dir = build_template_dir / f"cvforge-photo-{photo_path.name}"
-                    shutil.copy2(photo_path, photo_in_build_dir)
-
-                    if YAML_AVAILABLE:
-                        with open(yaml_in_build_dir, 'r', encoding='utf-8') as f:
-                            yaml_data = yaml.safe_load(f) or {}
-                        yaml_data["photo"] = photo_in_build_dir.name
-                        with open(yaml_in_build_dir, 'w', encoding='utf-8') as f:
-                            yaml.safe_dump(yaml_data, f, sort_keys=False, allow_unicode=True)
-                    else:
-                        with open(yaml_in_build_dir, 'r', encoding='utf-8') as f:
-                            lines = f.readlines()
-                        updated = False
-                        for i, line in enumerate(lines):
-                            stripped = line.lstrip()
-                            if stripped.startswith("photo:"):
-                                indent = line[: len(line) - len(stripped)]
-                                lines[i] = f"{indent}photo: \"{photo_in_build_dir.name}\"\n"
-                                updated = True
-                                break
-                        if not updated:
-                            lines.append(f"photo: \"{photo_in_build_dir.name}\"\n")
-                        with open(yaml_in_build_dir, 'w', encoding='utf-8') as f:
-                            f.writelines(lines)
-                else:
-                    print(f"Warning: Photo file '{photo_path_str}' not found.", file=sys.stderr)
-
-            typst.compile(
-                input=str(build_template_dir / "main.typ"),
+            _, warnings = typst.compile_with_warnings(
+                input=str(build_dir / "main.typ"),
                 output=str(output_file),
-                root=str(build_template_dir),
-                sys_inputs={"cv_data": input_file.name},
+                root=str(build_dir),
             )
+            for warning in warnings:
+                # Font fallbacks are reported once by warn_missing_font.
+                if not warning.message.startswith("unknown font family"):
+                    print(f"Warning: Typst: {warning.message}", file=sys.stderr)
 
         print(f"✓ CV generated successfully: {output_file}")
         return 0
 
     except Exception as e:
-        print(f"Error: Typst compilation failed:", file=sys.stderr)
+        print("Error: Typst compilation failed:", file=sys.stderr)
         print(f"  {e}", file=sys.stderr)
         return 1
 
@@ -389,8 +195,8 @@ def init_template(output_dir: Path) -> int:
 def show_fonts():
     """Show available font options."""
     print("Available fonts (all ATS-friendly):\n")
-    for key, (primary, fallbacks) in FONT_OPTIONS.items():
-        print(f"  {key:12} - {primary}")
+    for key, families in FONT_OPTIONS.items():
+        print(f"  {key:12} - {families[0]}")
     print("\nUsage: Add 'font: <name>' to your cv.yaml file.")
 
 
@@ -412,11 +218,6 @@ def ats_check(pdf_file: Path) -> int:
         print("Error: Input file must be a PDF file (.pdf)", file=sys.stderr)
         return 1
     
-    if not PYPDF_AVAILABLE:
-        print("Error: 'pypdf' library is required for ATS checking.", file=sys.stderr)
-        print("Install it with: pip install pypdf", file=sys.stderr)
-        return 1
-    
     report, output = check_ats(pdf_file)
     print(output)
     
@@ -434,7 +235,7 @@ def main():
     parser = argparse.ArgumentParser(
         prog="cvforge",
         description="Build clean, ATS-friendly PDF resumes from YAML with Typst.",
-        epilog="Examples:\n  cvforge init\n  cvforge cv.yaml\n  cvforge build resume.yaml\n  cvforge fonts\n  cvforge ats-check cv.pdf",
+        epilog="Examples:\n  cvforge init\n  cvforge cv.yaml\n  cvforge build resume.yaml -o out/resume.pdf\n  cvforge fonts\n  cvforge ats-check cv.pdf",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
@@ -451,6 +252,11 @@ def main():
         nargs="?",
         default="cv.yaml",
         help="Input YAML file (default: cv.yaml)"
+    )
+    build_parser.add_argument(
+        "-o", "--output",
+        type=Path,
+        help="Output PDF path or directory (default: next to the YAML file)"
     )
     
     init_parser = subparsers.add_parser("init", help="Create template cv.yaml")
@@ -477,7 +283,7 @@ def main():
         show_fonts()
         sys.exit(0)
     elif args.command == "build":
-        sys.exit(build_cv(Path(args.input)))
+        sys.exit(build_cv(Path(args.input), args.output))
     elif args.command == "ats-check":
         sys.exit(ats_check(Path(args.pdf)))
     else:
