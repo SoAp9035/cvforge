@@ -57,6 +57,9 @@ cvforge init
 # Generate PDF from your YAML file
 cvforge cv.yaml
 
+# Choose where the PDF is written (file or existing directory)
+cvforge cv.yaml -o dist/resume.pdf
+
 # List all available fonts
 cvforge fonts
 
@@ -80,6 +83,10 @@ fields and compact comments.
   sections are ignored unless you also customize the Typst template.
 - Use `__text__` for inline bold emphasis in summaries, bullets, skills, and
   similar narrative fields.
+- Quote values that must appear exactly, such as `gpa: "3.80"`. Unquoted
+  numbers and dates are accepted, but YAML reads `3.80` as `3.8`.
+- Unknown fields are ignored with a warning (and a suggestion for typos such as
+  `experiance`).
 - Keep facts accurate. Do not add employers, dates, credentials, tools, or
   metrics unless they are real and supplied.
 - Use compact, achievement-focused bullets. One or two pages is usually best
@@ -93,23 +100,27 @@ Below is the full reference:
 
 | Field | Required | Description |
 |-------|:--------:|-------------|
-| `language` | No | Section headings language: `"en"` (default) or `"tr"`. Does not translate content. |
-| `font` | No | Font family (run `cvforge fonts` to see available options). |
+| `language` | No | Section headings language: built-in `"en"` (default) or `"tr"`; other codes use English headings unless `section-titles` is set. Does not translate content. |
+| `font` | No | Font family (run `cvforge fonts` to see available options). CVForge warns when the font is not installed and names the fallback it uses. |
+| `paper` | No | `"a4"` (default) or `"letter"` |
+| `font-size` | No | Body text size, e.g. `"10pt"` (default) or `"9.5pt"` |
+| `margin` | No | Page margin in `pt`, `mm`, `cm`, or `in` (default: `"0.5in"`) |
+| `section-titles` | No | Mapping that overrides section headings, e.g. `experience: "Work History"` |
 | `name` | **Yes**| Your full name |
 | `role` | **Yes**| Job title / professional role |
 | `email` | **Yes**| Contact email |
 | `phone` | No | Phone number |
 | `location` | No | City, Country |
 | `website` | No | Personal website URL |
-| `website-text` | No | Custom display text for the website link |
+| `website-text` | No | Custom display text for the website link (default: the URL) |
 | `linkedin` | No | LinkedIn profile URL |
-| `linkedin-text`| No | Custom display text for the LinkedIn link |
+| `linkedin-text`| No | Custom display text for the LinkedIn link (default: the URL) |
 | `github` | No | GitHub profile URL |
-| `github-text` | No | Custom display text for the GitHub link |
+| `github-text` | No | Custom display text for the GitHub link (default: the URL) |
 | `photo` | No | Local path to your profile photo, resolved relative to the YAML file |
-| `photo-width` | No | Photo display width (default: `"2.5cm"`; examples: `"3cm"`, `"2in"`, `"80pt"`) |
+| `photo-width` | No | Photo display width in `pt`, `mm`, `cm`, or `in` (default: `"2.5cm"`) |
 | `summary` | No | Professional summary paragraph |
-| `skills` | No | List of skill categories with `Category` and `Items` |
+| `skills` | No | List of skill groups with `category` and `items` (`Category`/`Items` also work) |
 | `experience` | No | List of work entries with optional `description` bullet lists |
 | `education` | No | List of education entries with optional `description` bullet lists |
 | `projects` | No | List of project entries with optional `description` bullet lists |
@@ -117,6 +128,23 @@ Below is the full reference:
 | `awards` | No | List of award entries |
 | `languages` | No | List of language proficiency entries |
 | `interests` | No | List of interest/hobby strings |
+
+Section entries accept these fields:
+
+| Section | Fields |
+|---------|--------|
+| `experience` | `company`, `role`, `date`, `location`, `description` |
+| `education` | `school`, `degree`, `date`, `location`, `gpa`, `description` |
+| `projects` | `name`, `date`, `url`, `url-text`, `role`, `description` |
+| `certifications` | `name`, `issuer`, `date` |
+| `awards` | `name`, `issuer`, `date` |
+| `languages` | `name`, `level` |
+
+`description` is a list of bullet strings.
+
+Contact links show the URL itself by default (for example `github.com/you`),
+because ATS parsers read the visible text rather than the link target. Set
+`github-text`, `linkedin-text`, or `website-text` to show a label instead.
 
 ### Inline Bold Formatting
 
@@ -126,14 +154,24 @@ Use double underscores to make text bold in narrative fields (summary, descripti
 summary: "Built and scaled __high-throughput APIs__ for fintech workloads."
 ```
 
+Double underscores inside a word, such as `my__var`, stay literal. To show
+literal double underscores elsewhere, escape them with a backslash in single
+quotes or unquoted text:
+
+```yaml
+summary: 'Implemented Python \__init\__ hooks.'
+```
+
+In double-quoted YAML strings, write `\\__` instead.
+
 ---
 
 ## Features
 
 - **Cross-platform**: Linux, Windows, macOS
 - **ATS Compatible**: Clean, parseable text + built-in checker (`cvforge ats-check`)
-- **Multi-language Headers**: Support for EN/TR out of the box
-- **Typography Choices**: 17 available fonts (`cvforge fonts`)
+- **Multi-language Headers**: EN/TR out of the box, any language via `section-titles`
+- **Typography Choices**: 17 available fonts (`cvforge fonts`), plus paper size, font size, and margin settings
 - **Rich Formatting**: Inline bolding via `__text__`, profile photo support
 - **100% Local & Private**: No cloud storage, no online rendering
 
@@ -142,6 +180,15 @@ summary: "Built and scaled __high-throughput APIs__ for fintech workloads."
 ## Agent Skill
 
 Use the [CVForge agent skill](https://github.com/SoAp9035/cvforge-skill) to help coding agents create, edit, build, and validate CVForge resumes.
+
+---
+
+## Development
+
+```bash
+uv sync
+uv run pytest
+```
 
 ---
 
