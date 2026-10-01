@@ -49,3 +49,8 @@ path = "src/cvforge/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cvforge"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
