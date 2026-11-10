@@ -482,7 +482,7 @@ def main():
         sys.exit(ats_check(Path(args.pdf)))
     else:
         parser.print_help()
-        sys.exit(0)
+        sys.exit(2)
 
 
 if __name__ == "__main__":
